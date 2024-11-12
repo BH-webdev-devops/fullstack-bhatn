@@ -68,7 +68,7 @@ export default function Home() {
       )}
       <h2 className="text-center text-2xl font-bold mb-6">Todo List</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {todos?.map((todo: { todo_id: string, todo_title: string }) => (
+        {todos && todos?.map((todo: { todo_id: string, todo_title: string }) => (
           <a
           key={todo.todo_id}
           href={`/todo/${todo.todo_id}/task`}
