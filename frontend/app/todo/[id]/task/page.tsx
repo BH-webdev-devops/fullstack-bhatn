@@ -223,7 +223,7 @@ const Task: React.FC = () => {
             placeholder="Enter task name"
             style={{ marginRight: '8px' }}
           />
-          <button onClick={handleAddTask}>Add Task</button>
+          <button onClick={handleAddTask}>Save</button>
           <button onClick={() => setIsAdding(false)} style={{ marginLeft: '8px' }}>
             Cancel
           </button>

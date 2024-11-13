@@ -209,7 +209,7 @@ export const createTodoList = async (req: Request, res: Response): Promise<Respo
         //         await query(`INSERT INTO task (name, todo_id, completed, created_at) VALUES ($1, $2, $3, $4)`, [name, todoId, completed, await getCurrentTimestamp()])
         //     })
         // }
-        return res.status(201).json({ message: `Todo created successfully`, todo: result.rows[0] })
+        return res.status(201).json({ message: `Todo created successfully`, todo: result.rows[0] }) 
     }
     catch (err) {
         console.log(err)
