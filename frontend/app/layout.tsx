@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import NavBar from "./components/NavBar";
 import { AuthProvider } from "./context/AuthContext";
+import Layout from './components/Layout';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
+  children, pageProps
 }: Readonly<{
   children: React.ReactNode;
 }>) {
@@ -32,6 +33,9 @@ export default function RootLayout({
       >
         <AuthProvider>
         <NavBar/>
+        {/* <Layout>
+          <Component {...pageProps} />
+        </Layout> */}
         {children}
         </AuthProvider>
       </body>

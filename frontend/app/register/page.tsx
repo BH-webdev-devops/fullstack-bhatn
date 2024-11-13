@@ -19,7 +19,7 @@ const Register = () => {
             console.log('response', response)
             if(response.message === 'User registered successfully'){
                 alert(response.message)
-                router.push('/')
+                router.push('/login')
             }
             else if(response.message === 'User already exists'){
                 alert(response.message)

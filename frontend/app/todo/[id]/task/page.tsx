@@ -1,112 +1,327 @@
 'use client'
-import React, { useContext } from 'react';
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation'
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 
-
-// import { useRouter } from 'next/router';
-
-interface ParamsType {
-  params : {
-    id?: string | any
-  }
+interface TaskType {
+  id: number;
+  name: string;
+  created_at: string;
+  updated_at: string | null;
+  completed: boolean;
 }
 
-const Task: React.FC<ParamsType> =  () => {
-    const [task, setTask] = useState<null>(null);
-    const params = useParams<{id: string }>()
-    console.log(params)
+interface TodoType {
+  id: number,
+  title: string,
+  description: string,
+  user_id: number,
+  created_at: string,
+  updated_at: string,
+  priority: string,
+  completed: boolean,
+  category: string
+}
+  
 
-    useEffect(() => {
-        const fetchTask = async () => {
-            const token = localStorage.getItem('token')
-          try {
-            const res = await fetch(`http://localhost:3000/api/todo/${params.id}/task`, {
-              method: 'GET',
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-    
-            if (!res.ok) {
-              throw new Error('Failed to fetch task details');
-            }
-    
-            const data = await res.json();
-            console.log(data)
-            setTask(data);
-          } catch (err: any) {
-            
-            // setError(err.message);
-          }
-        };
-        fetchTask();
-      }, []);
-    
+const Task: React.FC = () => {
+  const [tasks, setTasks] = useState<TaskType[]>([]);
+  const [isEditing, setIsEditing] = useState<number | null>(null);
+  const [editedTask, setEditedTask] = useState<{ name: string; completed: boolean } | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
+  const [newTaskName, setNewTaskName] = useState('');
+  const params = useParams<{ id: string }>();
+  const [todo, setTodo] = useState<TodoType | null >(null);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`http://localhost:3000/api/todo/${params.id}/task`, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch task details');
+        }
+
+        const data = await res.json();
+        setTasks(data.task); // This should only happen once, inside useEffect
+        
+      } catch (err: any) {
+        console.error(err.message);
+      }
+    };
+    fetchTasks();
+
+
+    const fetchTodo = async () => {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`http://localhost:3000/api/todo/${params.id}`, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch todo details');
+        }
+
+        const data = await res.json();
+        console.log('todo details', data.todo)
+        setTodo(data.todo); // This should only happen once, inside useEffect
+        
+      } catch (err: any) {
+        console.error(err.message);
+      }
+    };
+    fetchTodo();
+
+  }, []);
+  const toggleTaskCompletion = async (taskId: number) => {
+    const token = localStorage.getItem('token');
+    const task = tasks.find((task) => task.id === taskId);
+    if (!task) return;
+
+    const updatedCompletedStatus = !task.completed;
+    console.log(typeof task.completed , task.completed)
+    try {
+      const res = await fetch(`http://localhost:3000/api/task/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ completed: Boolean(updatedCompletedStatus) }),
+      });
+
+      if (!res.ok) throw new Error('Failed to update task');
+
+      setTasks((prevTasks) =>
+        prevTasks.map((t) => (t.id === taskId ? { ...t, completed: updatedCompletedStatus } : t))
+      );
+    } catch (err: any) {
+      console.error('Error updating task:', err.message);
+    }
+  };
+
+  const handleEditClick = (task: TaskType) => {
+    setIsEditing(task.id);
+    setEditedTask({ name: task.name, completed: task.completed });
+  };
+
+  const handleSaveEdit = async (taskId: number) => {
+    const token = localStorage.getItem('token');
+    if (!editedTask) return;
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/task/${taskId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: editedTask.name, completed: editedTask.completed }),
+      });
+
+      if (!res.ok) throw new Error('Failed to update task');
+
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === taskId ? { ...task, name: editedTask.name, completed: editedTask.completed } : task
+        )
+      );
+
+      setIsEditing(null);
+      setEditedTask(null);
+    } catch (err: any) {
+      console.error('Error saving task:', err.message);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: number) => {
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`http://localhost:3000/api/task/${taskId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (!res.ok) throw new Error('Failed to delete task');
+
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+    } catch (err: any) {
+      console.error('Error deleting task:', err.message);
+    }
+  };
+
+  const handleAddTask = async () => {
+    const token = localStorage.getItem('token');
+    if (!newTaskName) return;
+
+    try {
+      console.log("todo id ", params.id)
+      const res = await fetch(`http://localhost:3000/api/task`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ todoId: params.id, name: newTaskName, completed: false, }),
+      });
+
+      if (!res.ok) throw new Error('Failed to add task');
+
+      const newTask = await res.json();
+      console.log(newTask)
+      
+      setTasks((prevTasks) => [...prevTasks, newTask.task]);
+      console.log(tasks)
+      
+      setIsAdding(false);
+      setNewTaskName("");
+    } catch (err: any) {
+      console.error('Error adding task:', err.message);
+    }
+  };
+
   return (
     <div>
-      <h1>tasks page</h1>
-  </div>
+      <h1>Tasks for todo {params.id}</h1>
+      <p>description: {todo?.description}</p>
+      <p>priority: {todo?.priority}</p>
+      <button
+        onClick={() => setIsAdding(true)}
+        style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          fontSize: '24px',
+          padding: '10px 15px',
+          borderRadius: '50%',
+          backgroundColor: '#4caf50',
+          color: 'white',
+          border: 'none',
+          cursor: 'pointer',
+        }}
+      >
+        +
+      </button>
+
+      {isAdding && (
+        <div style={{ marginBottom: '20px' }}>
+          <input
+            type="text"
+            value={newTaskName}
+            onChange={(e) => setNewTaskName(e.target.value)}
+            placeholder="Enter task name"
+            style={{ marginRight: '8px' }}
+          />
+          <button onClick={handleAddTask}>Add Task</button>
+          <button onClick={() => setIsAdding(false)} style={{ marginLeft: '8px' }}>
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* <ul>
+        {tasks.map((task) => (
+          <li key={task.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+            <span
+              onClick={() => toggleTaskCompletion(task.id)}
+              style={{
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                border: '1px solid #000',
+                marginRight: '10px',
+                cursor: 'pointer',
+                display: 'inline-block',
+                backgroundColor: task.completed ? '#4caf50' : 'transparent',
+              }}
+            ></span>
+
+            {isEditing === task.id ? (
+              <>
+                <input
+                  type="text"
+                  value={editedTask?.name || ''}
+                  onChange={(e) => setEditedTask({ ...editedTask!, name: e.target.value })}
+                  style={{ marginRight: '8px' }}
+                />
+                <button onClick={() => handleSaveEdit(task.id)}>Save</button>
+                <button onClick={() => handleDeleteTask(task.id)} style={{ color: 'red', marginLeft: '8px' }}>
+                  Delete
+                </button>
+              </>
+            ) : (
+              <>
+                <span
+                  style={{
+                    textDecoration: task.completed ? 'line-through' : 'none',
+                    color: task.completed ? 'gray' : 'black',
+                  }}
+                >
+                  {task.name}
+                </span>
+                <button onClick={() => handleEditClick(task)} style={{ marginLeft: '8px' }}>
+                  Edit
+                </button>
+              </>
+            )}
+          </li>
+        ))}
+      </ul> */}
+      <ul>
+  {tasks && tasks.map((task) => (
+    <li key={task.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+      <span
+        onClick={() => toggleTaskCompletion(task.id)}
+        style={{
+          width: '20px',
+          height: '20px',
+          borderRadius: '50%',
+          border: '1px solid #000',
+          marginRight: '10px',
+          cursor: 'pointer',
+          display: 'inline-block',
+          backgroundColor: task.completed ? '#4caf50' : 'transparent',
+        }}
+      ></span>
+
+      {isEditing === task.id ? (
+        <>
+          <input
+            type="text"
+            value={editedTask?.name || ''}
+            onChange={(e) => setEditedTask({ ...editedTask!, name: e.target.value })}
+            style={{ marginRight: '8px' }}
+          />
+          <button onClick={() => handleSaveEdit(task.id)}>Save</button>
+          <button onClick={() => handleDeleteTask(task.id)} style={{ color: 'red', marginLeft: '8px' }}>
+            Delete
+          </button>
+        </>
+      ) : (
+        <>
+          <span
+            style={{
+              textDecoration: task.completed ? 'line-through' : 'none',
+              color: task.completed ? 'gray' : 'black',
+            }}
+          >
+          {task.name}
+          </span>
+          <button onClick={() => handleEditClick(task)} style={{ marginLeft: '8px' }}>
+            Edit
+          </button>
+        </>
+      )}
+    </li>
+  ))}
+</ul>
+    </div>
   );
 };
 
 export default Task;
-
-// 'use client';
-
-// import { useState, useEffect } from 'react';
-
-// interface Book {
-//   id: string;
-//   title: string;
-//   author: string;
-//   description: string;
-//   published_date: string;
-// }
-
-// const BookDetailsPage: React.FC<{ params: { id: string } }> = ({ params }) => {
-//   const [book, setBook] = useState<Book | null>(null);
-//   const [error, setError] = useState<string | null>(null);
-
-//   useEffect(() => {
-//     const fetchBookDetails = async () => {
-//       try {
-//         const res = await fetch(`/api/books/${params.id}`, {
-//           method: 'GET',
-//           headers: {
-//             'Content-Type': 'application/json',
-//           },
-//         });
-
-//         if (!res.ok) {
-//           throw new Error('Failed to fetch book details');
-//         }
-
-//         const data = await res.json();
-//         setBook(data);
-//       } catch (err: any) {
-//         setError(err.message);
-//       }
-//     };
-
-//     fetchBookDetails();
-//   }, [params.id]);
-
-//   if (error) {
-//     return <div>Error: {error}</div>;
-//   }
-
-//   if (!book) {
-//     return <div>Loading...</div>;
-//   }
-
-//   return (
-//     <div>
-//       <h1>Book Details</h1>
-//       <p><strong>Title:</strong> {book.title}</p>
-//       <p><strong>Author:</strong> {book.author}</p>
-//       <p><strong>Description:</strong> {book.description}</p>
-//       <p><strong>Published Date:</strong> {book.published_date}</p>
-//     </div>
-//   );
-// };
-
-// export default BookDetailsPage;

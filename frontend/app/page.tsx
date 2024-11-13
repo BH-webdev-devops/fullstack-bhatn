@@ -4,20 +4,34 @@ import {useRouter} from 'next/navigation'
 import { useEffect, useState } from "react";
 
 
+interface TodoType {
+  id: number,
+  title: string,
+  description: string,
+  user_id: number,
+  created_at: string,
+  updated_at: string,
+  priority: string,
+  completed: boolean,
+  category: string
+}
+  
+
+
 export default function Home() {
   const { user, loading, isAuthenticated }: any = useAuth()
   const router = useRouter()
-  const [todos, setTodos] = useState<{ todo_id: string, todo_title: string }[]>([])
+  const [todos, setTodos] = useState<TodoType[]>([])
   // const [fetchLoading, setFetchLoading] = useState(true);
 
   useEffect(() => {
     // Only check for redirection once loading is complete
+    console.log("loading ", loading)
+    console.log("isAuthenticated ", isAuthenticated)
     if (!loading && !isAuthenticated) {
-      console.log('loading true')
-      router.push('/');
-      
+      router.push('/register');
     }
-    else if (!loading && isAuthenticated){
+    else if (!loading && isAuthenticated) {
       fetchTodos();
     }
   }, [loading, isAuthenticated]);
@@ -46,7 +60,7 @@ export default function Home() {
         const data = await res.json()
         console.log("data", data)
         setTodos(data.todo)
-      
+
       }
     }
     catch (err) {
@@ -68,14 +82,14 @@ export default function Home() {
       )}
       <h2 className="text-center text-2xl font-bold mb-6">Todo List</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {todos && todos?.map((todo: { todo_id: string, todo_title: string }) => (
+        {todos && todos?.map((todo: TodoType) => (
           <a
-          key={todo.todo_id}
-          href={`/todo/${todo.todo_id}/task`}
+          key={todo.id}
+          href={`/todo/${todo.id}/task`}
           className="block p-4 border border-gray-300 rounded-lg shadow hover:bg-gray-100 transition"
         >
-          <h3 className="text-lg font-semibold">{todo.todo_title}</h3>
-          <p className="text-gray-500">ID: {todo.todo_id}</p>
+          <h3 className="text-lg font-semibold">{todo.title}</h3>
+          <p className="text-gray-500">ID: {todo.id}</p>
         </a>
         ))}
     </div>
