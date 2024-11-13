@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Sidebar from '@/app/components/SideBar';
 
 interface TaskType {
   id: number;
@@ -186,11 +187,13 @@ const Task: React.FC = () => {
   };
 
   return (
+
     <div>
+       <Sidebar />
       <h1>Tasks for todo {params.id}</h1>
       <p>description: {todo?.description}</p>
       <p>priority: {todo?.priority}</p>
-      <button
+      <button type="button" className="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
         onClick={() => setIsAdding(true)}
         style={{
           position: 'fixed',

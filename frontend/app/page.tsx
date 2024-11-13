@@ -2,6 +2,7 @@
 import { useAuth } from "./context/AuthContext";
 import {useRouter} from 'next/navigation'
 import { useEffect, useState } from "react";
+import Sidebar from "./components/SideBar";
 
 
 interface TodoType {
@@ -29,7 +30,7 @@ export default function Home() {
     console.log("loading ", loading)
     console.log("isAuthenticated ", isAuthenticated)
     if (!loading && !isAuthenticated) {
-      router.push('/register');
+      router.push('/register')
     }
     else if (!loading && isAuthenticated) {
       fetchTodos();
@@ -77,6 +78,7 @@ export default function Home() {
 
   return (
     <>
+      <Sidebar />
       {!loading && isAuthenticated && user && (
         <h1 className="text-center text-xl">Hello world {user && user.email}</h1>
       )}

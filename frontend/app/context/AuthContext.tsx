@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchProfile = async () => {
     const token = localStorage.getItem('token')
+    console.log(token)
     if (!token) {
         setLoading(false)
       return
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
+      console.log(res)
       if (res.ok) {
         const data = await res.json()
         console.log("data", data)

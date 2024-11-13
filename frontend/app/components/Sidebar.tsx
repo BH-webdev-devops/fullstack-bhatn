@@ -1,19 +1,23 @@
+// components/Sidebar.tsx
 import Link from 'next/link';
 
-const Sidebar = () => {
+interface MenuItem {
+  name: string;
+  icon: string;
+}
+
+const menuItems: MenuItem[] = [
+  { name: 'Login', icon: '📊' },
+  { name: 'Register', icon: '📝' }
+];
+
+export default function Sidebar() {
   return (
-    <div className="h-screen w-64 bg-gray-800 text-white flex flex-col">
-      <div className="p-4 text-2xl font-bold">My App</div>
-      <nav className="flex flex-col p-4">
-        <Link href="/">
-          <a className="mb-2 p-2 hover:bg-gray-700 rounded">Home</a>
-        </Link>
-        <Link href="/todo">
-          <a className="mb-2 p-2 hover:bg-gray-700 rounded">Todo List</a>
-        </Link>
+    <div className="w-64 bg-gray-100 h-screen p-4">
+      <h2 className="text-lg font-bold mb-6">Navigation</h2>
+      <nav className="space-y-2">
+            <Link href="/">TODO</Link>
       </nav>
     </div>
   );
-};
-
-export default Sidebar;
+}

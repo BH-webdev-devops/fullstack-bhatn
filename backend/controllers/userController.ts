@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 export const getUserProfile = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
     try {
-        const result = await query(`SELECT id, name, email, profilepicture FROM users WHERE id = $1`, [userId])
+        const result = await query(`SELECT id, name, email, profile_picture FROM users WHERE id = $1`, [userId])
         const user = result.rows[0]
 
         if (!user) {
