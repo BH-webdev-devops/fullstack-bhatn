@@ -1,7 +1,7 @@
-import {Request, Response} from "express";
+import { Request, Response } from "express";
 import { query } from "../db/db";
 
-export const getCurrentTimestamp = ():  Promise<any>=> {
+export const getCurrentTimestamp = (): Promise<any> => {
     const currentTimestamp = new Date().toISOString();
     return Promise.resolve(currentTimestamp);
 };
@@ -12,14 +12,14 @@ export const getTodoList = async (req: Request, res: Response): Promise<Response
     const userId = (req as Request & { user: any }).user.id
     try {
         const result = await query(`SELECT 
-                t.id AS todo_id,
-                t.title AS todo_title,
-                t.description AS todo_description,
+                t.id AS id,
+                t.title AS title,
+                t.description AS description,
                 t.user_id,
-                t.created_at AS todo_created_at,
-                t.updated_at AS todo_updated_at,
+                t.created_at AS created_at,
+                t.updated_at AS updated_at,
                 t.priority,
-                t.completed AS todo_completed,
+                t.completed AS completed,
                 t.category,
                 tk.id AS task_id,
                 tk.name AS task_name,
@@ -32,7 +32,7 @@ export const getTodoList = async (req: Request, res: Response): Promise<Response
                 Task tk ON t.id = tk.todo_id
             WHERE t.user_id = $1
             ORDER BY 
-                t.id, tk.id;;`, [userId])   
+                t.id, tk.id;;`, [userId])
         const todo = result.rows
 
         if (!todo) {
@@ -40,30 +40,31 @@ export const getTodoList = async (req: Request, res: Response): Promise<Response
         }
 
         const todos = result.rows.reduce((acc: any[], row: any) => {
-            let todo = acc.find((t: any) => t.todo_id === row.todo_id);
+            let todo = acc.find((t: any) => t.id === row.id);
             if (!todo) {
                 todo = {
-                    todo_id: row.todo_id,
-                    todo_title: row.todo_title,
-                    todo_description: row.todo_description,
+                    id: row.id,
+                    title: row.title,
+                    description: row.description,
                     user_id: row.user_id,
-                    todo_created_at: row.todo_created_at,
-                    todo_updated_at: row.todo_updated_at,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
                     priority: row.priority,
-                    todo_completed: row.todo_completed,
+                    completed: row.completed,
                     category: row.category,
                     tasks: []
                 };
                 acc.push(todo);
             }
-            if (row.task_id){
-            todo.tasks.push({
-                task_id: row.task_id,
-                task_name: row.task_name,
-                task_created_at: row.task_created_at,
-                task_updated_at: row.task_updated_at,
-                task_completed: row.task_completed
-            })};
+            if (row.task_id) {
+                todo.tasks.push({
+                    task_id: row.task_id,
+                    task_name: row.task_name,
+                    task_created_at: row.task_created_at,
+                    task_updated_at: row.task_updated_at,
+                    task_completed: row.task_completed
+                })
+            };
             return acc;
         }, []);
 
@@ -80,31 +81,24 @@ export const getTodoList = async (req: Request, res: Response): Promise<Response
 }
 
 export const getTodoListById = async (req: Request, res: Response): Promise<Response | any> => {
-    const userId = (req as Request & { user: any }).user
+    const userId = (req as Request & { user: any }).user.id
     const todoId = req.params.id
     try {
         const result = await query(`SELECT 
-                t.id AS todo_id,
-                t.title AS todo_title,
-                t.description AS todo_description,
+                t.id AS id,
+                t.title AS title,
+                t.description AS description,
                 t.user_id,
-                t.created_at AS todo_created_at,
-                t.updated_at AS todo_updated_at,
+                t.created_at AS created_at,
+                t.updated_at AS updated_at,
                 t.priority,
-                t.completed AS todo_completed,
-                t.category,
-                tk.id AS task_id,
-                tk.name AS task_name,
-                tk.created_at AS task_created_at,
-                tk.updated_at AS task_updated_at,
-                tk.completed AS task_completed
+                t.completed AS completed,
+                t.category
             FROM 
-                Todo t
-            LEFT JOIN 
-                Task tk ON t.id = tk.todo_id
+                todo t
             WHERE t.user_id = $1 AND t.id = $2
             ORDER BY 
-                t.id, tk.id;;`, [userId, todoId])
+                t.id;`, [userId, todoId])
         const todo = result.rows
 
         if (!todo) {
@@ -112,39 +106,40 @@ export const getTodoListById = async (req: Request, res: Response): Promise<Resp
         }
 
         const todos = result.rows.reduce((acc: any[], row: any) => {
-            let todo = acc.find((t: any) => t.todo_id === row.todo_id);
+            let todo = acc.find((t: any) => t.id === row.id);
             if (!todo) {
                 todo = {
-                    todo_id: row.todo_id,
-                    todo_title: row.todo_title,
-                    todo_description: row.todo_description,
+                    id: row.id,
+                    title: row.title,
+                    description: row.description,
                     user_id: row.user_id,
-                    todo_created_at: row.todo_created_at,
-                    todo_updated_at: row.todo_updated_at,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
                     priority: row.priority,
-                    todo_completed: row.todo_completed,
+                    completed: row.completed,
                     category: row.category,
                     tasks: []
                 };
                 acc.push(todo);
             }
-            if (row.task_id){
-            todo.tasks.push({
-                task_id: row.task_id,
-                task_name: row.task_name,
-                task_created_at: row.task_created_at,
-                task_updated_at: row.task_updated_at,
-                task_completed: row.task_completed
-            })};
+            if (row.task_id) {
+                todo.tasks.push({
+                    task_id: row.task_id,
+                    task_name: row.task_name,
+                    task_created_at: row.task_created_at,
+                    task_updated_at: row.task_updated_at,
+                    task_completed: row.task_completed
+                })
+            };
             return acc;
         }, []);
 
         return res.status(200).json({
             message: "Todo Lists",
-            todo: todos
+            todo: todos[0]
         });
     }
-    catch(err){
+    catch (err) {
         console.log(err)
         return res.status(500).json({ message: `Internal server error` })
     }
@@ -192,7 +187,7 @@ export const getTaskByTodoId = async (req: Request, res: Response): Promise<Resp
             task: task
         });
     }
-    catch(err){
+    catch (err) {
         console.log(err)
         return res.status(500).json({ message: `Internal server error` })
     }
@@ -205,7 +200,7 @@ export const createTodoList = async (req: Request, res: Response): Promise<Respo
     console.log(title, description, priority, category, tasks)
     try {
         console.log('inside createTodoList')
-        await query(`INSERT INTO todo (title, description, user_id, priority, category, created_at, completed) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [title, description, userId, priority, category, await getCurrentTimestamp(), completed])
+        const result = await query(`INSERT INTO todo (title, description, user_id, priority, category, created_at, completed) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`, [title, description, userId, priority, category, await getCurrentTimestamp(), completed])
         // if (tasks) {
         //     const result = await query(`SELECT id FROM todo WHERE user_id = $1 AND title = $2`, [userId, title])
         //     const todoId = result.rows[0].id
@@ -214,7 +209,7 @@ export const createTodoList = async (req: Request, res: Response): Promise<Respo
         //         await query(`INSERT INTO task (name, todo_id, completed, created_at) VALUES ($1, $2, $3, $4)`, [name, todoId, completed, await getCurrentTimestamp()])
         //     })
         // }
-        return res.status(201).json({ message: `Todo created successfully` })
+        return res.status(201).json({ message: `Todo created successfully`, todo: result.rows[0] })
     }
     catch (err) {
         console.log(err)
@@ -226,9 +221,16 @@ export const createTask = async (req: Request, res: Response): Promise<Response 
     const userId = (req as Request & { user: any }).user.id
     const { todoId, name, completed } = req.body
     try {
-        
-        await query(`INSERT INTO task (name, todo_id, completed, created_at) VALUES ($1, $2, $3, $4)`, [name, todoId, completed, await getCurrentTimestamp()])
-        return res.status(201).json({ message: `Task created successfully` })
+        const created_at = await getCurrentTimestamp()
+        const result = await query(`INSERT INTO task (name, todo_id, completed, created_at) VALUES ($1, $2, $3, $4) RETURNING *`, [name, todoId, completed, created_at])
+        return res.status(201).json({
+            message: `Task created successfully`, task: {
+                todoId: todoId,
+                name: name,
+                completed: completed,
+                created_at: created_at
+            }
+        })
     }
     catch (err) {
         console.log(err)
@@ -321,5 +323,148 @@ export const deleteTask = async (req: Request, res: Response): Promise<Response 
     }
 }
 
+export const filterByCategory = async (req: Request, res: Response): Promise<Response | any> => {
+    const userId = (req as Request & { user: any }).user.id
+    const category = req.params.category
+    try {
+        const result = await query(`SELECT 
+                t.id AS id,
+                t.title AS title,
+                t.description AS description,
+                t.user_id,
+                t.created_at AS created_at,
+                t.updated_at AS updated_at,
+                t.priority,
+                t.completed AS completed,
+                t.category,
+                tk.id AS task_id,
+                tk.name AS task_name,
+                tk.created_at AS task_created_at,
+                tk.updated_at AS task_updated_at,
+                tk.completed AS task_completed
+            FROM 
+                Todo t
+            LEFT JOIN 
+                Task tk ON t.id = tk.todo_id
+            WHERE t.user_id = $1 AND t.category = $2
+            ORDER BY 
+                t.id, tk.id;;`, [userId, category])
+        const todo = result.rows
+
+        if (!todo) {
+            return res.status(404).json({ message: `No Todo list found` })
+        }
+
+        const todos = result.rows.reduce((acc: any[], row: any) => {
+            let todo = acc.find((t: any) => t.id === row.id);
+            if (!todo) {
+                todo = {
+                    id: row.id,
+                    title: row.title,
+                    description: row.description,
+                    user_id: row.user_id,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    priority: row.priority,
+                    completed: row.completed,
+                    category: row.category,
+                    tasks: []
+                };
+                acc.push(todo);
+            }
+            if (row.task_id) {
+                todo.tasks.push({
+                    task_id: row.task_id,
+                    task_name: row.task_name,
+                    task_created_at: row.task_created_at,
+                    task_updated_at: row.task_updated_at,
+                    task_completed: row.task_completed
+                })
+            };
+            return acc;
+        }, []);
+
+        return res.status(200).json({
+            message: "Todo Lists",
+            todo: todos
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: `Internal server error` })
+    }
+};
+
+export const filterByPriority = async (req: Request, res: Response): Promise<Response | any> => {
+    const userId = (req as Request & { user: any }).user.id
+    const priority = req.params.priority
+    try {
+        const result = await query(`SELECT 
+                t.id AS id,
+                t.title AS title,
+                t.description AS description,
+                t.user_id,
+                t.created_at AS created_at,
+                t.updated_at AS updated_at,
+                t.priority,
+                t.completed AS completed,
+                t.category,
+                tk.id AS task_id,
+                tk.name AS task_name,
+                tk.created_at AS task_created_at,
+                tk.updated_at AS task_updated_at,
+                tk.completed AS task_completed
+            FROM 
+                Todo t
+            LEFT JOIN 
+                Task tk ON t.id = tk.todo_id
+            WHERE t.user_id = $1 AND t.priority = $2
+            ORDER BY 
+                t.id, tk.id;;`, [userId, priority])
+        const todo = result.rows
+
+        if (!todo) {
+            return res.status(404).json({ message: `No Todo list found` })
+        }
+
+        const todos = result.rows.reduce((acc: any[], row: any) => {
+            let todo = acc.find((t: any) => t.id === row.id);
+            if (!todo) {
+                todo = {
+                    id: row.id,
+                    title: row.title,
+                    description: row.description,
+                    user_id: row.user_id,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    priority: row.priority,
+                    completed: row.completed,
+                    category: row.category,
+                    tasks: []
+                };
+                acc.push(todo);
+            }
+            if (row.task_id) {
+                todo.tasks.push({
+                    task_id: row.task_id,
+                    task_name: row.task_name,
+                    task_created_at: row.task_created_at,
+                    task_updated_at: row.task_updated_at,
+                    task_completed: row.task_completed
+                })
+            };
+            return acc;
+        }, []);
+
+        return res.status(200).json({
+            message: "Todo Lists",
+            todo: todos
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: `Internal server error` })
+    }
+}
 
 
