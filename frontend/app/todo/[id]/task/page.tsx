@@ -188,8 +188,11 @@ const Task: React.FC = () => {
 
   return (
 
-    <div>
-       <Sidebar />
+    <div className="grid grid-cols-[250px_1fr] h-screen">
+
+      <Sidebar />
+    {/* Main content on the right */}
+    <div className="p-4">
       <h1>Tasks for todo {params.id}</h1>
       <p>description: {todo?.description}</p>
       <p>priority: {todo?.priority}</p>
@@ -323,6 +326,7 @@ const Task: React.FC = () => {
     </li>
   ))}
 </ul>
+    </div>
     </div>
   );
 };

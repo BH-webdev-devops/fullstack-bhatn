@@ -77,25 +77,30 @@ export default function Home() {
 
 
   return (
-    <>
+    <div className="grid grid-cols-[250px_1fr] h-screen">
+      {/* Sidebar on the left */}
       <Sidebar />
-      {!loading && isAuthenticated && user && (
-        <h1 className="text-center text-xl">Hello world {user && user.email}</h1>
-      )}
-      <h2 className="text-center text-2xl font-bold mb-6">Todo List</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {todos && todos?.map((todo: TodoType) => (
-          <a
-          key={todo.id}
-          href={`/todo/${todo.id}/task`}
-          className="block p-4 border border-gray-300 rounded-lg shadow hover:bg-gray-100 transition"
-        >
-          <h3 className="text-lg font-semibold">{todo.title}</h3>
-          <p className="text-gray-500">ID: {todo.id}</p>
-        </a>
-        ))}
+  
+      {/* Main content on the right */}
+      <div className="p-4">
+        {!loading && isAuthenticated && user && (
+          <h1 className="text-center text-xl">Hello world {user.email}</h1>
+        )}
+        <h2 className="text-center text-2xl font-bold mb-6">Todo List</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {todos?.map((todo: TodoType) => (
+            <a
+              key={todo.id}
+              href={`/todo/${todo.id}/task`}
+              className="block p-4 border border-gray-300 rounded-lg shadow hover:bg-gray-100 transition"
+            >
+              <h3 className="text-lg font-semibold">{todo.title}</h3>
+              <p className="text-gray-500">ID: {todo.id}</p>
+            </a>
+          ))}
+        </div>
+      </div>
     </div>
-
-    </>
   );
+  
 }
