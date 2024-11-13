@@ -2,6 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Sidebar from '@/app/components/SideBar';
+import { DeleteIcon, CancelIcon, CalendarIcon, EditIcon } from '@/app/helpers/icons';
+import { useAuth } from '@/app/context/AuthContext';
+import {useRouter} from 'next/navigation';
 
 interface TaskType {
   id: number;
@@ -9,6 +12,7 @@ interface TaskType {
   created_at: string;
   updated_at: string | null;
   completed: boolean;
+  deadline: string | null;
 }
 
 interface TodoType {
@@ -22,70 +26,93 @@ interface TodoType {
   completed: boolean,
   category: string
 }
-  
+
 
 const Task: React.FC = () => {
+  const { loading, isAuthenticated }: any = useAuth()
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [isEditing, setIsEditing] = useState<number | null>(null);
   const [editedTask, setEditedTask] = useState<{ name: string; completed: boolean } | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [newTaskName, setNewTaskName] = useState('');
   const params = useParams<{ id: string }>();
-  const [todo, setTodo] = useState<TodoType | null >(null);
+  const [todo, setTodo] = useState<TodoType | null>(null);
+  const router = useRouter()
+
+  const fetchTasks = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`http://localhost:3000/api/todo/${params.id}/task`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch task details');
+      }
+
+      const data = await res.json();
+      setTasks(data.task); // This should only happen once, inside useEffect
+
+    } catch (err: any) {
+      console.error(err.message);
+    }
+  };
+
+  const fetchTodo = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`http://localhost:3000/api/todo/${params.id}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch todo details');
+      }
+
+      const data = await res.json();
+      console.log('todo details', data.todo)
+      setTodo(data.todo); // This should only happen once, inside useEffect
+
+    } catch (err: any) {
+      console.error(err.message);
+    }
+  };
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      const token = localStorage.getItem('token');
-      try {
-        const res = await fetch(`http://localhost:3000/api/todo/${params.id}/task`, {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    
+    if (!loading && !isAuthenticated) {
+      router.push('/register')
+    }
+    else if (!loading && isAuthenticated) {
+      fetchTasks();
+      fetchTodo();
+    }
 
-        if (!res.ok) {
-          throw new Error('Failed to fetch task details');
-        }
+  }, [loading, isAuthenticated]);
 
-        const data = await res.json();
-        setTasks(data.task); // This should only happen once, inside useEffect
-        
-      } catch (err: any) {
-        console.error(err.message);
-      }
-    };
-    fetchTasks();
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
+  console.log(loading, isAuthenticated)
 
-    const fetchTodo = async () => {
-      const token = localStorage.getItem('token');
-      try {
-        const res = await fetch(`http://localhost:3000/api/todo/${params.id}`, {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${token}` },
-        });
+  // if (!user) {
+  //   return <p>Redirecting...</p>;
+  // }
 
-        if (!res.ok) {
-          throw new Error('Failed to fetch todo details');
-        }
+ 
 
-        const data = await res.json();
-        console.log('todo details', data.todo)
-        setTodo(data.todo); // This should only happen once, inside useEffect
-        
-      } catch (err: any) {
-        console.error(err.message);
-      }
-    };
-    fetchTodo();
+  
 
-  }, []);
   const toggleTaskCompletion = async (taskId: number) => {
     const token = localStorage.getItem('token');
     const task = tasks.find((task) => task.id === taskId);
     if (!task) return;
 
     const updatedCompletedStatus = !task.completed;
-    console.log(typeof task.completed , task.completed)
+    console.log(typeof task.completed, task.completed)
     try {
       const res = await fetch(`http://localhost:3000/api/task/${taskId}`, {
         method: 'PUT',
@@ -110,6 +137,11 @@ const Task: React.FC = () => {
     setIsEditing(task.id);
     setEditedTask({ name: task.name, completed: task.completed });
   };
+
+  const handleCancelEdit = async () => {
+    setIsEditing(null);
+    setEditedTask(null);
+  }
 
   const handleSaveEdit = async (taskId: number) => {
     const token = localStorage.getItem('token');
@@ -175,10 +207,10 @@ const Task: React.FC = () => {
 
       const newTask = await res.json();
       console.log(newTask)
-      
+
       setTasks((prevTasks) => [...prevTasks, newTask.task]);
       console.log(tasks)
-      
+
       setIsAdding(false);
       setNewTaskName("");
     } catch (err: any) {
@@ -191,142 +223,103 @@ const Task: React.FC = () => {
     <div className="grid grid-cols-[250px_1fr] h-screen">
 
       <Sidebar />
-    {/* Main content on the right */}
-    <div className="p-4">
-      <h1>Tasks for todo {params.id}</h1>
-      <p>description: {todo?.description}</p>
-      <p>priority: {todo?.priority}</p>
-      <button type="button" className="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
-        onClick={() => setIsAdding(true)}
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          fontSize: '24px',
-          padding: '10px 15px',
-          borderRadius: '50%',
-          backgroundColor: '#4caf50',
-          color: 'white',
-          border: 'none',
-          cursor: 'pointer',
-        }}
-      >
-        +
-      </button>
+      {/* Main content on the right */}
+      <div className="flex flex-col items-center p-6 bg-gray-100 min-h-screen">
+      <div className="w-full max-w-3xl bg-white rounded-lg shadow-md p-6 mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Tasks for {todo?.title}</h1>
+          <p className="text-gray-700 mb-2"><strong>Description:</strong> {todo?.description}</p>
+          <p className="text-gray-700"><strong>Priority:</strong> {todo?.priority}</p>
+        </div>
 
-      {isAdding && (
-        <div style={{ marginBottom: '20px' }}>
-          <input
-            type="text"
-            value={newTaskName}
-            onChange={(e) => setNewTaskName(e.target.value)}
-            placeholder="Enter task name"
-            style={{ marginRight: '8px' }}
-          />
-          <button onClick={handleAddTask}>Add Task</button>
-          <button onClick={() => setIsAdding(false)} style={{ marginLeft: '8px' }}>
-            Cancel
+        <div className="flex justify-start my-4 w-full max-w-3xl">
+          <button
+            onClick={() => setIsAdding(true)}
+            className="bg-blue-400 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            New Task
           </button>
         </div>
-      )}
 
-      {/* <ul>
-        {tasks.map((task) => (
-          <li key={task.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <span
-              onClick={() => toggleTaskCompletion(task.id)}
-              style={{
-                width: '20px',
-                height: '20px',
-                borderRadius: '50%',
-                border: '1px solid #000',
-                marginRight: '10px',
-                cursor: 'pointer',
-                display: 'inline-block',
-                backgroundColor: task.completed ? '#4caf50' : 'transparent',
-              }}
-            ></span>
+        {isAdding && (
+          <div style={{ marginBottom: '20px' }}>
+            <input
+              type="text"
+              value={newTaskName}
+              onChange={(e) => setNewTaskName(e.target.value)}
+              placeholder="Enter task name"
+              style={{ marginRight: '8px' }}
+            />
+            <button onClick={handleAddTask}>Add</button>
+            <button onClick={() => setIsAdding(false)} style={{ marginLeft: '8px' }}>
+              {CancelIcon()}
+            </button>
+          </div>
+        )}
 
-            {isEditing === task.id ? (
-              <>
-                <input
-                  type="text"
-                  value={editedTask?.name || ''}
-                  onChange={(e) => setEditedTask({ ...editedTask!, name: e.target.value })}
-                  style={{ marginRight: '8px' }}
-                />
-                <button onClick={() => handleSaveEdit(task.id)}>Save</button>
-                <button onClick={() => handleDeleteTask(task.id)} style={{ color: 'red', marginLeft: '8px' }}>
-                  Delete
-                </button>
-              </>
-            ) : (
-              <>
-                <span
-                  style={{
-                    textDecoration: task.completed ? 'line-through' : 'none',
-                    color: task.completed ? 'gray' : 'black',
-                  }}
-                >
-                  {task.name}
-                </span>
-                <button onClick={() => handleEditClick(task)} style={{ marginLeft: '8px' }}>
-                  Edit
-                </button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul> */}
-      <ul>
-  {tasks && tasks.map((task) => (
-    <li key={task.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-      <span
-        onClick={() => toggleTaskCompletion(task.id)}
-        style={{
-          width: '20px',
-          height: '20px',
-          borderRadius: '50%',
-          border: '1px solid #000',
-          marginRight: '10px',
-          cursor: 'pointer',
-          display: 'inline-block',
-          backgroundColor: task.completed ? '#4caf50' : 'transparent',
-        }}
-      ></span>
+        <ul className="w-full max-w-3xl bg-white rounded-lg shadow-md p-6">
+          {tasks && tasks.map((task) => (
+            <li key={task.id} style={{ display: 'flex',  marginBottom: '8px' }} className="flex py-4 border-b border-gray-200 last:border-b-0">
+              <span
+                onClick={() => toggleTaskCompletion(task.id)}
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  border: '1px solid #000',
+                  marginRight: '10px',
+                  cursor: 'pointer',
+                  display: 'inline-block',
+                  backgroundColor: task.completed ? '#4caf50' : 'transparent',
+                }}
+              ></span>
 
-      {isEditing === task.id ? (
-        <>
-          <input
-            type="text"
-            value={editedTask?.name || ''}
-            onChange={(e) => setEditedTask({ ...editedTask!, name: e.target.value })}
-            style={{ marginRight: '8px' }}
-          />
-          <button onClick={() => handleSaveEdit(task.id)}>Save</button>
-          <button onClick={() => handleDeleteTask(task.id)} style={{ color: 'red', marginLeft: '8px' }}>
-            Delete
-          </button>
-        </>
-      ) : (
-        <>
-          <span
-            style={{
-              textDecoration: task.completed ? 'line-through' : 'none',
-              color: task.completed ? 'gray' : 'black',
-            }}
-          >
-          {task.name}
-          </span>
-          <button onClick={() => handleEditClick(task)} style={{ marginLeft: '8px' }}>
-            Edit
-          </button>
-        </>
-      )}
-    </li>
-  ))}
-</ul>
-    </div>
+              {isEditing === task.id ? (
+                <>
+                  <input
+                    type="text"
+                    value={editedTask?.name || ''}
+                    onChange={(e) => setEditedTask({ ...editedTask!, name: e.target.value })}
+                    style={{ marginRight: '8px' }}
+                  />
+                  <button onClick={() => handleSaveEdit(task.id)}>Save</button>
+
+                  <button onClick={() => handleCancelEdit()} style={{ marginLeft: '8px' }}>
+                    {CancelIcon()}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span
+                    style={{
+                      textDecoration: task.completed ? 'line-through' : 'none',
+                      color: task.completed ? 'gray' : 'black',
+                    }} className="text-lg text-gray-700"
+                  > 
+
+                    <div className="flex  space-x-4 p-2 rounded-lg shadow-md">
+                        <div className="flex space-x-2">
+                          {CalendarIcon(new Date(task.created_at))}
+                          {task.deadline ? CalendarIcon(new Date(task.deadline)) : <div style={{ width: '50px' }}></div>}
+                        </div>
+                        <span className="text-lg text-gray-700 font-semibold">{task.name}</span>
+                      </div>
+                    
+                  </span>
+
+                  <div className="flex justify-end my-4 w-full">
+                    <button onClick={() => handleEditClick(task)} className="mr-2 p-2 text-green-300">
+                      {EditIcon()}
+                    </button>
+                    <button onClick={() => handleDeleteTask(task.id)} className="ml-2 p-2 text-red-600">
+                      {DeleteIcon()}
+                    </button>
+                  </div>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

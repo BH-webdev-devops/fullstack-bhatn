@@ -3,14 +3,23 @@
 import { useState } from 'react'
 import { Dialog, DialogPanel } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { useAuth } from '../context/AuthContext'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
+
 
 const navigation = [
-  { name: 'Product', href: '/product' },
   { name: 'Contact', href: '/contact' }
 ]
 
+
 export default function Example() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
+  const { isAuthenticated }: any = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { logout }: any = useAuth()
+  const router = useRouter()
 
   return (
     <header className="bg-white">
@@ -33,21 +42,39 @@ export default function Example() {
           ))}
         </div>
         <div className="flex flex-1 items-center justify-end gap-x-6">
-          <a href="/login" className="hidden text-sm/6 font-semibold text-gray-900 lg:block">
-            Log in
-          </a>
-          <a
-            href="/register"
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Sign up
-          </a>
-          <a
-            href="/profile"
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Profile
-          </a>
+
+
+          {isAuthenticated ? (<>
+            <a
+              href="/profile"
+              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Profile
+            </a>
+
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+
+              }}
+              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Logout
+            </button>
+          </>
+          ) : <>
+            <a href="/login" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+              Log in
+            </a>
+            <a
+              href="/register"
+              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Sign up
+            </a>
+          </>}
+
         </div>
         <div className="flex lg:hidden">
           <button

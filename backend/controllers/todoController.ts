@@ -152,7 +152,7 @@ export const getTaskByTodoId = async (req: Request, res: Response): Promise<Resp
     const taskId = req.params.id
     try {
         const result = await query(`SELECT 
-                id, name, created_at, updated_at, completed
+                id, name, created_at, updated_at, completed, deadline
             FROM 
                 task
             WHERE todo_id = $1
@@ -219,19 +219,18 @@ export const createTodoList = async (req: Request, res: Response): Promise<Respo
 
 export const createTask = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
-    const { todoId, name, completed } = req.body
+    const { todoId, name, completed, deadline } = req.body
     try {
         const created_at = await getCurrentTimestamp()
-        const result = await query(`INSERT INTO task (name, todo_id, completed, created_at) VALUES ($1, $2, $3, $4) RETURNING *`, [name, todoId, completed, created_at])
+        const result = await query(`INSERT INTO task (name, todo_id, completed, created_at, deadline) VALUES ($1, $2, $3, $4, $5) RETURNING *`, [name, todoId, completed, created_at, deadline])
+        if (!result) {
+            return res.status(404).json({ message: `Task not created` })
+        }
         return res.status(201).json({
-            message: `Task created successfully`, task: {
-                todoId: todoId,
-                name: name,
-                completed: completed,
-                created_at: created_at
-            }
+            message: `Task created successfully`, task: result.rows[0]
         })
     }
+
     catch (err) {
         console.log(err)
         return res.status(500).json({ message: `Internal server error` })
@@ -267,7 +266,7 @@ export const updateTodoList = async (req: Request, res: Response): Promise<Respo
 export const updateTask = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
     const taskId = req.params.id
-    const { name, completed } = req.body
+    const { name, completed, deadline } = req.body
     console.log(name, completed)
     try {
         const result = await query(`SELECT * FROM task WHERE id = $1`, [taskId])
@@ -277,8 +276,9 @@ export const updateTask = async (req: Request, res: Response): Promise<Response 
         }
         const updatedName = name || task.name
         const updatedCompleted = completed || task.completed
+        const updatedDeadline = deadline || task.deadline
 
-        await query(`UPDATE task SET name = $1, completed = $2, updated_at = $3 WHERE id = $4`, [updatedName, updatedCompleted, await getCurrentTimestamp(), taskId])
+        await query(`UPDATE task SET name = $1, completed = $2, updated_at = $3, deadline = $5 WHERE id = $4`, [updatedName, updatedCompleted, await getCurrentTimestamp(), taskId, updatedDeadline])
         return res.status(203).json({ message: `Task updated successfully` })
     }
     catch (err) {

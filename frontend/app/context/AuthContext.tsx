@@ -2,6 +2,9 @@
 
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import {useRouter} from 'next/navigation'
+
+
 
 interface AuthContextType {
   user: any;
@@ -18,6 +21,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [loading, setLoading] = useState(true)
+    const router = useRouter()
 
   // Check if there is a token in localStorage on app load
   useEffect(() => {
@@ -87,11 +91,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
   };
 
-  // Logout function
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-  };
+ // Logout function
+const logout = () => {
+  localStorage.removeItem('token');  // Remove the token from local storage
+  setUser(null);                     // Clear the user data
+  setIsAuthenticated(false);         // Set authentication status to false
+  setLoading(false);
+  router.push('/login');             // Redirect to the login page
+};
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated, loading, login, register, logout }}> 
