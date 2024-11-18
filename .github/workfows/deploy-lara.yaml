@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches:
-      - gitHub-actions-bhatn
+      - deploy-lara
   workflow_dispatch:
 
 jobs:
