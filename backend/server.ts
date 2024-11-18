@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express, { Application, Request, Response } from 'express';
 import 'dotenv/config';
 import cors from 'cors';
 import { pool } from './db/db';
@@ -29,16 +29,13 @@ app.get('/images', (req, res) => {
     });
 });
 
-app.get('/', (req, res) => {
-    res.status(200).json({ message: 'API CI/CD' });
-}
-);
+app.get('/', (req: Request, res: Response): any => {
+    return res.send(`Welcome to our node and postgres API`)
+})
 
 app.use('/public/images', express.static('public/images'))
 
-app.use((req, res, next) => {
-    res.status(200).json({ message: 'API CI/CD Integration' });
-});
+
 app.use('/api', authRouter);
 app.use('/api', userRouter);
 app.use('/api', emailRouter);
