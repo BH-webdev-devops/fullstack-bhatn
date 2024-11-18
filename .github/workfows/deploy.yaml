@@ -19,10 +19,16 @@ jobs:
           node-version: '19' # Use your preferred Node version
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          cd backend
+          npm install
+     
 
       - name: Start the server (if applicable)
-        run: npm start &
+        run: |
+          cd backend
+          npm start &
+          
         env:
           DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
           DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
