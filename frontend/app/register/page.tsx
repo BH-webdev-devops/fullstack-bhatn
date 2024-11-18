@@ -19,7 +19,7 @@ const Register = () => {
             console.log('response', response)
             if(response.message === 'User registered successfully'){
                 alert(response.message)
-                router.push('/')
+                router.push('/login')
             }
             else if(response.message === 'User already exists'){
                 alert(response.message)
@@ -95,7 +95,7 @@ const Register = () => {
                                     required
                                     onChange={e => setPassword(e.target.value) }
                                     autoComplete="current-password"
-                                    className="block w-full text-black rounded-md border-0 py-1.5 text-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm/6"
+                                    className="block w-full text-black rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm/6"
                                 />
                             </div>
                         </div>

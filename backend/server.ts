@@ -6,6 +6,7 @@ import bodyParser from 'body-parser';
 import authRouter from './routes/authRouter';
 import userRouter from './routes/userRouter';
 import emailRouter from './routes/emailRouter';
+import todoRouter from './routes/todoRouter';
 
 
 const app: Application = express();
@@ -33,6 +34,7 @@ app.use('/public/images', express.static('public/images'))
 app.use('/api', authRouter);
 app.use('/api', userRouter);
 app.use('/api', emailRouter);
+app.use('/api', todoRouter);
 
 const startServer = async () => {
     try {
