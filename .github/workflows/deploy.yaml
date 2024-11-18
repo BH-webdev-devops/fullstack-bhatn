@@ -26,12 +26,21 @@ jobs:
 
       - name: Navigate to project directory
         run: cd backend
+        run: pwd
+        run: ls
       
       - name: Install dependencies
-        run: cd backend & npm install
+        run: |
+          ls
+          pws
+          cd backend
+          pwd
+          npm install
 
       - name: Start the server (if applicable)
-        run: cd backend & npm start &
+        run: |
+          cd backend
+          npm start &
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
