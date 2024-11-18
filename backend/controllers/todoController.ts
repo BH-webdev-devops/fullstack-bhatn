@@ -325,7 +325,7 @@ export const deleteTask = async (req: Request, res: Response): Promise<Response 
 
 export const filterByCategory = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
-    const category = req.params.category
+    const category = req.query.category
     try {
         const result = await query(`SELECT 
                 t.id AS id,
@@ -336,19 +336,12 @@ export const filterByCategory = async (req: Request, res: Response): Promise<Res
                 t.updated_at AS updated_at,
                 t.priority,
                 t.completed AS completed,
-                t.category,
-                tk.id AS task_id,
-                tk.name AS task_name,
-                tk.created_at AS task_created_at,
-                tk.updated_at AS task_updated_at,
-                tk.completed AS task_completed
+                t.category
             FROM 
-                Todo t
-            LEFT JOIN 
-                Task tk ON t.id = tk.todo_id
+                todo t
             WHERE t.user_id = $1 AND t.category = $2
             ORDER BY 
-                t.id, tk.id;;`, [userId, category])
+                t.id;`, [userId, category])
         const todo = result.rows
 
         if (!todo) {
@@ -372,15 +365,6 @@ export const filterByCategory = async (req: Request, res: Response): Promise<Res
                 };
                 acc.push(todo);
             }
-            if (row.task_id) {
-                todo.tasks.push({
-                    task_id: row.task_id,
-                    task_name: row.task_name,
-                    task_created_at: row.task_created_at,
-                    task_updated_at: row.task_updated_at,
-                    task_completed: row.task_completed
-                })
-            };
             return acc;
         }, []);
 
@@ -395,9 +379,26 @@ export const filterByCategory = async (req: Request, res: Response): Promise<Res
     }
 };
 
+export const filterTodos = async (req: Request, res: Response): Promise<Response | any> => {
+    const userId = (req as Request & { user: any }).user.id
+    console.log(req.query)
+    if (req.query.category) {
+        return filterByCategory(req, res)
+    } else if (req.query.priority) {
+        return filterByPriority(req, res)
+    }
+    else if (req.query.completed) {
+        return filterByCompleted(req, res)
+    }
+    else {
+        return res.status(400).json({ message: `Invalid query parameter` })
+    }
+}
+
+
 export const filterByPriority = async (req: Request, res: Response): Promise<Response | any> => {
     const userId = (req as Request & { user: any }).user.id
-    const priority = req.params.priority
+    const priority = req.query.priority
     try {
         const result = await query(`SELECT 
                 t.id AS id,
@@ -408,19 +409,12 @@ export const filterByPriority = async (req: Request, res: Response): Promise<Res
                 t.updated_at AS updated_at,
                 t.priority,
                 t.completed AS completed,
-                t.category,
-                tk.id AS task_id,
-                tk.name AS task_name,
-                tk.created_at AS task_created_at,
-                tk.updated_at AS task_updated_at,
-                tk.completed AS task_completed
+                t.category
             FROM 
-                Todo t
-            LEFT JOIN 
-                Task tk ON t.id = tk.todo_id
+                todo t
             WHERE t.user_id = $1 AND t.priority = $2
             ORDER BY 
-                t.id, tk.id;;`, [userId, priority])
+                t.id;`, [userId, priority])
         const todo = result.rows
 
         if (!todo) {
@@ -444,15 +438,62 @@ export const filterByPriority = async (req: Request, res: Response): Promise<Res
                 };
                 acc.push(todo);
             }
-            if (row.task_id) {
-                todo.tasks.push({
-                    task_id: row.task_id,
-                    task_name: row.task_name,
-                    task_created_at: row.task_created_at,
-                    task_updated_at: row.task_updated_at,
-                    task_completed: row.task_completed
-                })
-            };
+            return acc;
+        }, []);
+
+        return res.status(200).json({
+            message: "Todo Lists by Priority",
+            todo: todos
+        })
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: `Internal server error` })
+    }
+}
+
+export const filterByCompleted = async (req: Request, res: Response): Promise<Response | any> => {
+    const userId = (req as Request & { user: any }).user.id
+    const completed = (req.query.completed === 'true') ? true : false
+    try {
+        const result = await query(`SELECT 
+                t.id AS id,
+                t.title AS title,
+                t.description AS description,
+                t.user_id,
+                t.created_at AS created_at,
+                t.updated_at AS updated_at,
+                t.priority,
+                t.completed AS completed,
+                t.category
+            FROM 
+                todo t
+            WHERE t.user_id = $1 AND t.completed = $2
+            ORDER BY 
+                t.id;`, [userId, completed])
+        const todo = result.rows
+
+        if (!todo) {
+            return res.status(404).json({ message: `No Todo list found` })
+        }
+
+        const todos = result.rows.reduce((acc: any[], row: any) => {
+            let todo = acc.find((t: any) => t.id === row.id);
+            if (!todo) {
+                todo = {
+                    id: row.id,
+                    title: row.title,
+                    description: row.description,
+                    user_id: row.user_id,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    priority: row.priority,
+                    completed: row.completed,
+                    category: row.category,
+                    tasks: []
+                };
+                acc.push(todo);
+            }
             return acc;
         }, []);
 
@@ -466,5 +507,7 @@ export const filterByPriority = async (req: Request, res: Response): Promise<Res
         return res.status(500).json({ message: `Internal server error` })
     }
 }
+
+
 
 
