@@ -36,6 +36,9 @@ app.get('/', (req, res) => {
 
 app.use('/public/images', express.static('public/images'))
 
+app.use((req, res, next) => {
+    res.status(200).json({ message: 'API CI/CD Integration' });
+});
 app.use('/api', authRouter);
 app.use('/api', userRouter);
 app.use('/api', emailRouter);
