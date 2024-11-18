@@ -26,8 +26,6 @@ jobs:
 
       - name: Navigate to project directory
         run: cd backend
-        run: pwd
-        run: ls
       
       - name: Install dependencies
         run: |
