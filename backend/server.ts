@@ -1,4 +1,4 @@
-import express, {Application} from 'express';
+import express, { Application } from 'express';
 import 'dotenv/config';
 import cors from 'cors';
 import { pool } from './db/db';
@@ -22,12 +22,17 @@ app.get('/images', (req, res) => {
     fs.readdir('public/images', (err: any, files: any) => {
         if (err) {
             console.error(err);
-            res.status(500).json({error: 'Internal server error'});
+            res.status(500).json({ error: 'Internal server error' });
         } else {
-            res.status(200).json({images: files});
+            res.status(200).json({ images: files });
         }
     });
 });
+
+app.get('/', (req, res) => {
+    res.send('API integration CI/CD');
+}
+);
 
 app.use('/public/images', express.static('public/images'))
 
@@ -42,7 +47,7 @@ const startServer = async () => {
         console.log('Database connected');
         client.release();
         app.listen(process.env.PORT, () => {
-        console.log(`Server is running on http://localhost:${process.env.PORT}`);
+            console.log(`Server is running on https://fullstack-bhatn.onrender.com/`);
         });
     } catch (error) {
         console.error('Database connection error:', error);

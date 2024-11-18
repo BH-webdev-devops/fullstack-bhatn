@@ -48,7 +48,20 @@ jobs:
           nodemailer_email: ${{ secrets.nodemailer_email }}
           nodemailer_password: ${{ secrets.nodemailer_password }}
           PORT: ${{ secrets.PORT  }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }} }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }} 
+
+      - name: Trigger Render Deployment
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          # Define the Render API endpoint and service ID
+          SERVICE_ID=srv-cstke5pu0jms73aqaj6g # Replace this with your actual Service ID
+          RENDER_API_URL="https://api.render.com/v1/services/srv-cstke5pu0jms73aqaj6g/deploys"
+          # Trigger the deployment using Render's API
+          curl -X POST \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            $RENDER_API_URL
 
 
       - name: Wait for server to be ready
