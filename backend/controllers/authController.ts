@@ -3,7 +3,7 @@ import {query} from '../db/db';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
-import { User } from '../types/user';
+import { User } from '../types/User';
 
 
 export const registerUser = async (req: Request, res: Response): Promise<Response|any> => {

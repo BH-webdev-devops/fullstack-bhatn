@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import {query} from '../db/db'
-import { User } from "../types/user";
+import { User } from "../types/User";
 
 export const checkUserData = (checkForAllFields: boolean) => {
     return async (req: Request, res: Response, next: NextFunction): Promise<Response | any> => {
