@@ -56,11 +56,11 @@ jobs:
 
       - name: Trigger Render Deployment
         env:
-          LARA_RENDER_API_KEY: ${{ secrets.LARA_RENDER_API_KEY }} #used to get the service ID https://api-docs.render.com/reference/list-services
+          RENDER_API_KEY: ${{ secrets.LARA_RENDER_API_KEY }} #used to get the service ID https://api-docs.render.com/reference/list-services
         run: |
           # Define the Render API endpoint and service ID
-          SERVICE_ID=srv-cstjg9tumphs73fplo3g # Replace this with your actual Service ID
-          RENDER_API_URL="https://api.render.com/v1/services/srv-cstjg9tumphs73fplo3g/deploys"
+          SERVICE_ID=srv-cstkindumphs73fq6et0 # Replace this with your actual Service ID
+          RENDER_API_URL="https://api.render.com/v1/services/srv-cstkindumphs73fq6et0/deploys"
           # Trigger the deployment using Render's API
           curl -X POST \
             -H "Accept: application/json" \
