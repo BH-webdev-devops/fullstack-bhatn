@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           ls
-          pws
+          pwd
           cd backend
           pwd
           npm install
