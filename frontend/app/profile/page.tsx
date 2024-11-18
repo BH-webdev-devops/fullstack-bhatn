@@ -20,7 +20,7 @@ const Profile = () => {
       <p>Email: {user.email}</p>
       <div>
         {user.profilepicture && (
-        <img src={`http://localhost:3000${user.profilepicture}`} alt="Profile picture" />
+        <img src={`https://todolist-app-5rgn.onrender.com${user.profilepicture}`} alt="Profile picture" />
         )}
   </div>
 

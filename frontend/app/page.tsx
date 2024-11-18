@@ -63,7 +63,7 @@ export default function Home() {
     //   return
     // }
     try {
-      const res = await fetch(`http://localhost:3000/api/todo`, {
+      const res = await fetch(`https://todolist-app-5rgn.onrender.com/api/todo`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -97,7 +97,7 @@ export default function Home() {
   const handleAddTodo = async () => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`http://localhost:3000/api/todo`, {
+      const res = await fetch(`https://todolist-app-5rgn.onrender.com/api/todo`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -121,7 +121,7 @@ export default function Home() {
   const handleDeleteTodo = async (todoId: number) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`http://localhost:3000/api/todo/${todoId}`, {
+      const res = await fetch(`https://todolist-app-5rgn.onrender.com/api/todo/${todoId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });
