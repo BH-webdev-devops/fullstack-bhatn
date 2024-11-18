@@ -29,6 +29,10 @@ app.get('/images', (req, res) => {
     });
 });
 
+app.get('/test', (req, res ) : any => {
+    return res.send(`test route`)
+})
+
 app.use('/public/images', express.static('public/images'))
 
 app.use('/api', authRouter);
