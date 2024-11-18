@@ -30,7 +30,7 @@ app.get('/images', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.send('API integration CI/CD');
+    res.status(200).json({ message: 'API CI/CD' });
 }
 );
 
