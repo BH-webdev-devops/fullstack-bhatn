@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches:
-      - deploy-lara
+      - gitHub-actions-bhatn
   workflow_dispatch:
 
 jobs:
@@ -16,29 +16,43 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '19' # Use your preferred Node version
+          node-version: '16' # Use your preferred Node version
 
+      - name: Check the current directory
+        run: pwd 
+
+      - name: List the files in the current directory
+        run: ls
+
+      - name: Navigate to project directory
+        run: cd backend
+      
       - name: Install dependencies
         run: |
+          ls
+          pwd
           cd backend
+          pwd
           npm install
-     
 
       - name: Start the server (if applicable)
         run: |
           cd backend
           npm start &
-          
         env:
           DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
           DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
           DATABASE_DATABASE: ${{ secrets.DATABASE_DATABASE }}
           DATABASE_USER: ${{ secrets.DATABASE_USER }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-          
+          nodemailer_email: ${{ secrets.nodemailer_email }}
+          nodemailer_password: ${{ secrets.nodemailer_password }}
+          PORT: ${{ secrets.PORT  }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }} }}
+
+
       - name: Wait for server to be ready
-        run: sleep 10 
-          
+        run: sleep 10
+
       - name: Check server health
         run: curl http://localhost:3000
-  
