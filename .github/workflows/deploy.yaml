@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: '16' # Use your preferred Node version
 
+      - name: Navigate to project directory
+        run: cd backend
+      
       - name: Install dependencies
         run: npm install
 
