@@ -68,4 +68,4 @@ jobs:
         run: sleep 10
 
       - name: Check server health
-        run: curl https://api-docs.render.com
+        run: curl https://fullstack-bhatn.onrender.com
