@@ -18,6 +18,12 @@ jobs:
         with:
           node-version: '16' # Use your preferred Node version
 
+      - name: Check the current directory
+        run: pwd 
+
+      - name: List the files in the current directory
+        run: ls
+
       - name: Navigate to project directory
         run: cd backend
       
