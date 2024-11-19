@@ -86,6 +86,7 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.LARA_VERCEL_TOKEN }}
         run: |
+          cd frontend
           npx vercel deploy --prod --token $VERCEL_TOKEN --confirm && npm install --force && npx vercel deploy --prod --token $VERCEL_TOKEN --confirm
          
 
