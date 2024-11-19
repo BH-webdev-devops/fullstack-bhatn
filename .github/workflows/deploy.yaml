@@ -74,6 +74,7 @@ jobs:
         run: |
           cd frontend
           npm install --legacy-peer-deps
+          
       - name: Run Lint
         run: |
           cd frontend
