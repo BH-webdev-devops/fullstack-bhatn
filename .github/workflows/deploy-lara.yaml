@@ -67,5 +67,25 @@ jobs:
             -H "Authorization: Bearer $RENDER_API_KEY" \
             $RENDER_API_URL
 
+      - name: Install dependencies
+        run: |
+          cd ..
+          cd frontend
+          npm install
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.LARA_VERCEL_TOKEN }}
+        run: |
+          npx vercel deploy --prod --token $VERCEL_TOKEN --confirm
+
+
+
       # - name: Check server health
       #   run: curl http://localhost:3000
