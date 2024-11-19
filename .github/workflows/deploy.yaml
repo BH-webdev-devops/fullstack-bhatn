@@ -33,7 +33,7 @@ jobs:
           pwd
           cd backend
           pwd
-          npm install --legacy-peer-deps
+          npm install
 
       - name: Start the server (if applicable)
         run: |
@@ -91,4 +91,4 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           cd frontend
-          npx vercel deploy --prod --token $VERCEL_TOKEN --confirm
+          npx vercel deploy --prod --token $VERCEL_TOKEN --confirm --legacy-peer-deps
