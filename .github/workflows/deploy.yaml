@@ -84,7 +84,10 @@ jobs:
       - name: Build Next.js app
         run: |
           cd frontend
-          npm run build
+          npm run build --legacy-peer-deps
+
+      - name: Install specific vercel version
+        run: npm install -g vercel@39.0.5
  
       - name: Deploy to Vercel
         env:
