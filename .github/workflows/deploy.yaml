@@ -33,7 +33,7 @@ jobs:
           pwd
           cd backend
           pwd
-          npm install
+          npm install --legacy-peer-deps
 
       - name: Start the server (if applicable)
         run: |
@@ -74,7 +74,7 @@ jobs:
       - name: Install dependencies for frontend
         run: |
           cd frontend
-          npm install
+          npm install --legacy-peer-deps
  
       - name: Run Lint
         run: |
