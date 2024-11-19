@@ -1,10 +1,10 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import Sidebar from '@/app/components/SideBar';
+import Sidebar from '../../../components/Sidebar';
 import { DeleteIcon, CancelIcon, CalendarIcon, EditIcon } from '@/app/helpers/icons';
 import { useAuth } from '@/app/context/AuthContext';
-import {useRouter} from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 interface TaskType {
   id: number;
@@ -29,7 +29,8 @@ interface TodoType {
 
 
 const Task: React.FC = () => {
-  const { loading, isAuthenticated }: any = useAuth()
+  const useContext = useAuth()
+  const { loading, isAuthenticated } = useContext ?? {};
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [isEditing, setIsEditing] = useState<number | null>(null);
   const [editedTask, setEditedTask] = useState<{ name: string; completed: boolean } | null>(null);
@@ -54,10 +55,15 @@ const Task: React.FC = () => {
       const data = await res.json();
       setTasks(data.task); // This should only happen once, inside useEffect
 
-    } catch (err: any) {
-      console.error(err.message);
-    }
-  };
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+        // Handle the error
+      } else {
+        console.error('An unknown error occurred');
+      }
+    };
+  }
 
   const fetchTodo = async () => {
     const token = localStorage.getItem('token');
@@ -75,13 +81,18 @@ const Task: React.FC = () => {
       console.log('todo details', data.todo)
       setTodo(data.todo); // This should only happen once, inside useEffect
 
-    } catch (err: any) {
-      console.error(err.message);
-    }
-  };
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+        // Handle the error
+      } else {
+        console.error('An unknown error occurred');
+      }
+    };
+  }
 
   useEffect(() => {
-    
+
     if (!loading && !isAuthenticated) {
       router.push('/register')
     }
@@ -97,14 +108,6 @@ const Task: React.FC = () => {
   }
 
   console.log(loading, isAuthenticated)
-
-  // if (!user) {
-  //   return <p>Redirecting...</p>;
-  // }
-
- 
-
-  
 
   const toggleTaskCompletion = async (taskId: number) => {
     const token = localStorage.getItem('token');
@@ -128,10 +131,15 @@ const Task: React.FC = () => {
       setTasks((prevTasks) =>
         prevTasks.map((t) => (t.id === taskId ? { ...t, completed: updatedCompletedStatus } : t))
       );
-    } catch (err: any) {
-      console.error('Error updating task:', err.message);
-    }
-  };
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+        // Handle the error
+      } else {
+        console.error('An unknown error occurred');
+      }
+    };
+  }
 
   const handleEditClick = (task: TaskType) => {
     setIsEditing(task.id);
@@ -167,10 +175,15 @@ const Task: React.FC = () => {
 
       setIsEditing(null);
       setEditedTask(null);
-    } catch (err: any) {
-      console.error('Error saving task:', err.message);
-    }
-  };
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+        // Handle the error
+      } else {
+        console.error('An unknown error occurred');
+      }
+    };
+  }
 
   const handleDeleteTask = async (taskId: number) => {
     const token = localStorage.getItem('token');
@@ -183,10 +196,15 @@ const Task: React.FC = () => {
       if (!res.ok) throw new Error('Failed to delete task');
 
       setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-    } catch (err: any) {
-      console.error('Error deleting task:', err.message);
-    }
-  };
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+        // Handle the error
+      } else {
+        console.error('An unknown error occurred');
+      }
+    };
+  }
 
   const handleAddTask = async () => {
     const token = localStorage.getItem('token');
@@ -213,10 +231,15 @@ const Task: React.FC = () => {
 
       setIsAdding(false);
       setNewTaskName("");
-    } catch (err: any) {
-      console.error('Error adding task:', err.message);
-    }
-  };
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+        // Handle the error
+      } else {
+        console.error('An unknown error occurred');
+      }
+    };
+  }
 
   return (
 
@@ -225,7 +248,7 @@ const Task: React.FC = () => {
       <Sidebar />
       {/* Main content on the right */}
       <div className="flex flex-col items-center p-6 bg-gray-100 min-h-screen">
-      <div className="w-full max-w-3xl bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="w-full max-w-3xl bg-white rounded-lg shadow-md p-6 mb-6">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Tasks for {todo?.title}</h1>
           <p className="text-gray-700 mb-2"><strong>Description:</strong> {todo?.description}</p>
           <p className="text-gray-700"><strong>Priority:</strong> {todo?.priority}</p>
@@ -258,7 +281,7 @@ const Task: React.FC = () => {
 
         <ul className="w-full max-w-3xl bg-white rounded-lg shadow-md p-6">
           {tasks && tasks.map((task) => (
-            <li key={task.id} style={{ display: 'flex',  marginBottom: '8px' }} className="flex py-4 border-b border-gray-200 last:border-b-0">
+            <li key={task.id} style={{ display: 'flex', marginBottom: '8px' }} className="flex py-4 border-b border-gray-200 last:border-b-0">
               <span
                 onClick={() => toggleTaskCompletion(task.id)}
                 style={{
@@ -294,16 +317,16 @@ const Task: React.FC = () => {
                       textDecoration: task.completed ? 'line-through' : 'none',
                       color: task.completed ? 'gray' : 'black',
                     }} className="text-lg text-gray-700"
-                  > 
+                  >
 
                     <div className="flex  space-x-4 p-2 rounded-lg shadow-md">
-                        <div className="flex space-x-2">
-                          {CalendarIcon(new Date(task.created_at))}
-                          {task.deadline ? CalendarIcon(new Date(task.deadline)) : <div style={{ width: '50px' }}></div>}
-                        </div>
-                        <span className="text-lg text-gray-700 font-semibold">{task.name}</span>
+                      <div className="flex space-x-2">
+                        {CalendarIcon(new Date(task.created_at))}
+                        {task.deadline ? CalendarIcon(new Date(task.deadline)) : <div style={{ width: '50px' }}></div>}
                       </div>
-                    
+                      <span className="text-lg text-gray-700 font-semibold">{task.name}</span>
+                    </div>
+
                   </span>
 
                   <div className="flex justify-end my-4 w-full">

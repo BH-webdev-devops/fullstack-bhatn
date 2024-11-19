@@ -2,7 +2,7 @@
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from "react";
-import Sidebar from "./components/SideBar";
+import Sidebar from "./components/Sidebar";
 import { DeleteIcon } from '@/app/helpers/icons';
 
 
@@ -20,7 +20,8 @@ interface TodoType {
 
 
 export default function Home() {
-  const { user, loading, isAuthenticated }: any = useAuth()
+  const authContext = useAuth()
+  const { user, loading, isAuthenticated } = authContext || {}
   const router = useRouter()
   const [todos, setTodos] = useState<TodoType[]>([])
   const [isAddingTodo, setIsAddingTodo] = useState(false); // Controls the popup form visibility
@@ -37,24 +38,6 @@ export default function Home() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [completedFilter, setCompletedFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
-
-  const handleCategoryFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCategoryFilter(e.target.value);
-  };
-
-  const handleCompletedFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCompletedFilter(e.target.value);
-  };
-
-  const handlePriorityFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPriorityFilter(e.target.value);
-  };
-
-  const filteredTodos = todos.filter(todo =>
-    todo.category.toLowerCase().includes(categoryFilter.toLowerCase()) &&
-    (completedFilter === '' || todo.completed === (completedFilter === 'true')) &&
-    todo.priority.toLowerCase().includes(priorityFilter.toLowerCase())
-  );
 
   // const [fetchLoading, setFetchLoading] = useState(true);
 
@@ -150,8 +133,13 @@ export default function Home() {
       setTodos((prevTodos) => [...prevTodos, createdTodo.todo]); // Add the new todo to the list
       setIsAddingTodo(false); // Close the popup
       setNewTodo({ title: '', description: '', priority: '', category: '', completed: false }); // Reset the form
-    } catch (err: any) {
-      console.error('Error adding todo:', err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+        // Handle the error
+      } else {
+        console.error('An unknown error occurred');
+      }
     }
   };
 
@@ -166,8 +154,13 @@ export default function Home() {
       if (!res.ok) throw new Error('Failed to delete todo');
 
       setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== todoId));
-    } catch (err: any) {
-      console.error('Error deleting todo:', err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error(err.message);
+        // Handle the error
+      } else {
+        console.error('An unknown error occurred');
+      }
     }
   };
 
