@@ -1,10 +1,14 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import Sidebar from '@/app/components/SideBar';
 import { DeleteIcon, CancelIcon, CalendarIcon, EditIcon } from '@/app/helpers/icons';
 import { useAuth } from '@/app/context/AuthContext';
 import {useRouter} from 'next/navigation';
+import Sidebar from '@/app/components/Sidebar';
+
+interface CustomError {
+  message: string;
+}
 
 interface TaskType {
   id: number;
@@ -29,7 +33,8 @@ interface TodoType {
 
 
 const Task: React.FC = () => {
-  const { loading, isAuthenticated }: any = useAuth()
+  const authContext = useAuth()
+  const { loading, isAuthenticated } = authContext || {}
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [isEditing, setIsEditing] = useState<number | null>(null);
   const [editedTask, setEditedTask] = useState<{ name: string; completed: boolean } | null>(null);
@@ -54,8 +59,9 @@ const Task: React.FC = () => {
       const data = await res.json();
       setTasks(data.task); // This should only happen once, inside useEffect
 
-    } catch (err: any) {
-      console.error(err.message);
+    } catch (err) {
+      const error = err as CustomError;
+      console.error(error.message);
     }
   };
 
@@ -75,8 +81,9 @@ const Task: React.FC = () => {
       console.log('todo details', data.todo)
       setTodo(data.todo); // This should only happen once, inside useEffect
 
-    } catch (err: any) {
-      console.error(err.message);
+    } catch (err) {
+      const error = err as CustomError;
+      console.error(error.message);
     }
   };
 
@@ -128,8 +135,9 @@ const Task: React.FC = () => {
       setTasks((prevTasks) =>
         prevTasks.map((t) => (t.id === taskId ? { ...t, completed: updatedCompletedStatus } : t))
       );
-    } catch (err: any) {
-      console.error('Error updating task:', err.message);
+    } catch (err) {
+      const error = err as CustomError;
+      console.error('Error updating task:', error.message);
     }
   };
 
@@ -167,8 +175,9 @@ const Task: React.FC = () => {
 
       setIsEditing(null);
       setEditedTask(null);
-    } catch (err: any) {
-      console.error('Error saving task:', err.message);
+    } catch (err) {
+      const error=err as CustomError
+      console.error('Error saving task:', error.message);
     }
   };
 
@@ -183,8 +192,9 @@ const Task: React.FC = () => {
       if (!res.ok) throw new Error('Failed to delete task');
 
       setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-    } catch (err: any) {
-      console.error('Error deleting task:', err.message);
+    } catch (err) {
+      const error = err as CustomError
+      console.error('Error deleting task:', error.message);
     }
   };
 
@@ -213,8 +223,9 @@ const Task: React.FC = () => {
 
       setIsAdding(false);
       setNewTaskName("");
-    } catch (err: any) {
-      console.error('Error adding task:', err.message);
+    } catch (err) {
+      const error = err as CustomError
+      console.error('Error adding task:', error.message);
     }
   };
 

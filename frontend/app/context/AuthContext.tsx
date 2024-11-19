@@ -3,15 +3,17 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {useRouter} from 'next/navigation'
+import {User} from '../../types/User'
+
 
 
 
 interface AuthContextType {
-  user: any;
+  user: User | null;
   isAuthenticated: boolean,
   loading: boolean, 
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ message: string }>;
+  register: (name: string, email: string, password: string) => Promise<{ message: string }>;
   logout: () => void;
 }
 

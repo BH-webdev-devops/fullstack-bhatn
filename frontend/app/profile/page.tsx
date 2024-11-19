@@ -1,12 +1,12 @@
 'use client'
-import React, { useContext } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect } from 'react';
 // import { useRouter } from 'next/router';
 
 
 const Profile = () => {
-    const { user }: any = useAuth();
+  const authContext = useAuth();
+  const user = authContext?.user;
     // const router = useRouter();
   if (!user) {
     // router.push('/');

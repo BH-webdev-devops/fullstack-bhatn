@@ -4,10 +4,12 @@ import {useState} from 'react'
 import { useAuth } from '../context/AuthContext'
 import {useRouter} from 'next/navigation'
 
+
 const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const {login} : any = useAuth()
+    const authContext = useAuth()
+    const { login } = authContext || { login: async () => ({ message: '' }) }
     const router = useRouter()
 
     const handleSubmit = async (e : React.FormEvent) => {

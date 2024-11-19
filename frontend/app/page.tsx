@@ -2,8 +2,8 @@
 import { useAuth } from "./context/AuthContext";
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from "react";
-import Sidebar from "./components/SideBar";
 import { DeleteIcon } from '@/app/helpers/icons';
+import Sidebar from "./components/Sidebar";
 
 
 interface TodoType {
@@ -18,9 +18,14 @@ interface TodoType {
   category: string
 }
 
+interface CustomError {
+  message: string
+}
 
 export default function Home() {
-  const { user, loading, isAuthenticated }: any = useAuth()
+  const authContext = useAuth()
+  const { user, loading, isAuthenticated } = authContext || {}
+
   const router = useRouter()
   const [todos, setTodos] = useState<TodoType[]>([])
   const [isAddingTodo, setIsAddingTodo] = useState(false); // Controls the popup form visibility
@@ -113,8 +118,9 @@ export default function Home() {
       setTodos((prevTodos) => [...prevTodos, createdTodo.todo]); // Add the new todo to the list
       setIsAddingTodo(false); // Close the popup
       setNewTodo({ title: '', description: '', priority: '', category: '', completed: false }); // Reset the form
-    } catch (err: any) {
-      console.error('Error adding todo:', err.message);
+    } catch (err) {
+      const error = err as CustomError;
+      console.error('Error adding todo:', error.message);
     }
   };
 
@@ -129,8 +135,9 @@ export default function Home() {
       if (!res.ok) throw new Error('Failed to delete todo');
 
       setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== todoId));
-    } catch (err: any) {
-      console.error('Error deleting todo:', err.message);
+    } catch (err) {
+      const error = err as CustomError;
+      console.error('Error deleting todo:', error.message);
     }
   };
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState } from 'react'
@@ -12,12 +11,11 @@ const navigation = [
   { name: 'Contact', href: '/contact' }
 ]
 
-
 export default function Example() {
   // const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
-  const { isAuthenticated }: any = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { logout }: any = useAuth()
+  const authContext = useAuth()
+  const { isAuthenticated, logout } = authContext || { isAuthenticated: false, logout: () => {} }
   // const router = useRouter()
 
   return (

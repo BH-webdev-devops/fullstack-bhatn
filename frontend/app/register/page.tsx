@@ -9,7 +9,8 @@ const Register = () => {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const {register} : any = useAuth()
+    const authContext = useAuth()
+    const { register } = authContext || { register: async () => ({ message: '' }) }
     const router = useRouter()
 
     const handleSubmit = async (e : React.FormEvent) => {
