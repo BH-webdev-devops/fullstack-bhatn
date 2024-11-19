@@ -70,12 +70,10 @@ jobs:
       - name: Check server health
         run: curl https://fullstack-bhatn.onrender.com
 
- 
       - name: Install dependencies for frontend
         run: |
           cd frontend
           npm install --legacy-peer-deps
- 
       - name: Run Lint
         run: |
           cd frontend
