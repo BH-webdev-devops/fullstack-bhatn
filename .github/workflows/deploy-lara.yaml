@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Use your preferred Node version
+          node-version: '19' # Use your preferred Node version
 
       - name: Check the current directory
         run: pwd 
@@ -70,7 +70,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd frontend
-          npm install
+          npm install --force
 
       - name: Run Lint
         run:  |
@@ -86,7 +86,8 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.LARA_VERCEL_TOKEN }}
         run: |
-          npx vercel deploy --prod --token $VERCEL_TOKEN --confirm
+          npx vercel deploy --prod --token $VERCEL_TOKEN --confirm && npm install --force && npx vercel deploy --prod --token $VERCEL_TOKEN --confirm
+         
 
 
 
