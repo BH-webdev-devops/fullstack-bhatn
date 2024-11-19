@@ -1,5 +1,5 @@
 'use client';
-import Sidebar from "../components/SideBar";
+import Sidebar from "../components/Sidebar";
 
 const Contact = () => {
   return (
