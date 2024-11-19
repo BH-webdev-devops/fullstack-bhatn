@@ -2,7 +2,7 @@ name: CI/CD Pipeline for Next.js
 on:
   push:
     branches:
-      - main
+      - deploy-lara
   pull_request:
     branches:
       - main
