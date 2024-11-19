@@ -1,11 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState } from 'react'
 import { Dialog, DialogPanel } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '../context/AuthContext'
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 
 
 
@@ -15,11 +14,11 @@ const navigation = [
 
 
 export default function Example() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
+  // const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
   const { isAuthenticated }: any = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { logout }: any = useAuth()
-  const router = useRouter()
+  // const router = useRouter()
 
   return (
     <header className="bg-white">

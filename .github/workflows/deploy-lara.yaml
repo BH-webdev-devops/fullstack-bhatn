@@ -69,7 +69,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd ..
           cd frontend
           npm install
 
