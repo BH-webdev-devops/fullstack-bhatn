@@ -8,7 +8,7 @@ on:
       - main
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Use your preferred OS
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
