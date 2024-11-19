@@ -3,7 +3,8 @@ import { useAuth } from "./context/AuthContext";
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from "react";
 import Sidebar from "./components/SideBar";
-import { DeleteIcon } from '@/app/helpers/icons';
+import { DeleteIcon, CancelIcon, CalendarIcon, EditIcon } from '@/app/helpers/icons';
+
 
 
 interface TodoType {
@@ -24,7 +25,8 @@ export default function Home() {
   const router = useRouter()
   const [todos, setTodos] = useState<TodoType[]>([])
   const [isAddingTodo, setIsAddingTodo] = useState(false); // Controls the popup form visibility
-
+  const [isEditing, setIsEditing] = useState<number | null>(null);
+  const [editedTodo, setEditedTodo] = useState<{ title: string; description: string, priority: string, category: string } | null>(null);
 
   const [newTodo, setNewTodo] = useState({
     title: '',
@@ -118,6 +120,45 @@ export default function Home() {
     }
   };
 
+  const handleEditClick = (todo: TodoType) => {
+    setIsEditing(todo.id);
+    setEditedTodo({ title: todo.title, description: todo.description, priority: todo.priority, category: todo.category});
+  };
+
+  const handleCancelEdit = async () => {
+    setIsEditing(null);
+    setEditedTodo(null);
+  }
+
+  const handleSaveEdit = async (todoId: number) => {
+    const token = localStorage.getItem('token');
+    if (!editedTodo) return;
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/todo/${todoId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: editedTodo.title, description: editedTodo.description, priority: editedTodo.priority, category: editedTodo.category }),
+      });
+
+      if (!res.ok) throw new Error('Failed to update todo');
+
+      setTodos((prevTodos) =>
+        prevTodos.map((todo) =>
+          todo.id === todoId ? { ...todo, title: editedTodo.title, description: editedTodo.description,  priority: editedTodo.priority, category: editedTodo.category} : todo
+        )
+      );
+
+      setIsEditing(null);
+      setEditedTodo(null);
+    } catch (err: any) {
+      console.error('Error saving todo:', err.message);
+    }
+  };
+
   const handleDeleteTodo = async (todoId: number) => {
     const token = localStorage.getItem('token');
     try {
@@ -157,40 +198,103 @@ export default function Home() {
 
         {/* <h2 className="text-center text-2xl font-bold mb-6">Todo List</h2> */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {todos && todos?.map((todo: TodoType) => (
-            <div key={todo.id} className="relative">
-            <a
-              href={`/todo/${todo.id}/task`}
-              className="block p-4 border border-gray-300 rounded-lg shadow hover:bg-gray-100 transition"
-            >
-              <h3 className="text-lg font-semibold">{todo.title}</h3>
-              <p className="text-gray-500">{todo.description}</p>
-            </a>
-            <button
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent the click event from bubbling to the <a> tag
-                handleDeleteTodo(todo.id);
-              }}
-              style={{
-                color: 'red',
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              {DeleteIcon()}
-            </button>
-          </div>
+              {todos &&
+                todos.map((todo: TodoType) => (
+                  <div key={todo.id} className="relative">
+                   
+                    
+                    {isEditing === todo.id ? (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">Edit Todo</h3>
+                        <input
+                          type="text"
+                          value={editedTodo?.title || ""}
+                          onChange={(e) => setEditedTodo({ ...editedTodo!, title: e.target.value })}
+                          placeholder="Title"
+                          className="w-full rounded-md border-gray-300 mb-2"
+                        />
+                        <textarea
+                          value={editedTodo?.description || ""}
+                          onChange={(e) => setEditedTodo({ ...editedTodo!, description: e.target.value })}
+                          placeholder="Description"
+                          className="w-full rounded-md border-gray-300 mb-2"
+                        />
+                        <select
+                          value={editedTodo?.priority || ""}
+                          onChange={(e) => setEditedTodo({ ...editedTodo!, priority: e.target.value })}
+                          className="w-full rounded-md border-gray-300 mb-2"
+                        >
+                          <option value="">Select Priority</option>
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                        </select>
+                        <select
+                          value={editedTodo?.category || ""}
+                          onChange={(e) => setEditedTodo({ ...editedTodo!, category: e.target.value })}
+                          className="w-full rounded-md border-gray-300 mb-4"
+                        >
+                          <option value="">Select Category</option>
+                          <option value="work">Work</option>
+                          <option value="personal">Personal</option>
+                          <option value="others">Others</option>
+                        </select>
+                        <div className="flex justify-between">
+                          <button
+                            onClick={() => handleSaveEdit(todo.id)}
+                            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <a
+                          href={`/todo/${todo.id}/task`}
+                          className="block p-4 border border-gray-300 rounded-lg shadow hover:bg-gray-100 transition"
+                        >
+                          <h3 className="text-lg font-semibold">{todo.title}</h3>
+                          <p className="text-gray-500">{todo.description}</p>
+                          <p className="text-gray-500 mb-2">
+                          <strong>Priority:</strong> {todo.priority}
+                          </p>
+                          <p className="text-gray-500 mb-2">
+                            <strong>Category:</strong> {todo.category}
+                          </p>
+                        </a>
+                        <div className="flex justify-between">
+                          <button
+                            onClick={() => handleEditClick(todo)}
+                            className="mr-2 p-2 text-green-300"
+                          >
+                           {EditIcon()}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent click propagation
+                              handleDeleteTodo(todo.id);
+                            }}
+                            className="ml-2 p-2 text-red-600"
+                          >
+                           {DeleteIcon()}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </div>
 
-          ))}
-        </div>
+
+
       </div>
-      
-      
-        
         {/* Popup form to add a new todo */}
         {isAddingTodo && (
           <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
@@ -250,6 +354,8 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        
     </div>
 
   );
