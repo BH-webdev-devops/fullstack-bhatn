@@ -13,62 +13,35 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
         with:
-          node-version: '19' # Use your preferred Node version
+          version: 'latest'
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Check the current directory
-        run: pwd 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-      - name: List the files in the current directory
-        run: ls
-
-      - name: Navigate to project directory
-        run: cd backend
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: fullstack-bhatn:latest
+          platforms: linux/amd64
       
-      - name: Install dependencies
-        run: |
-          ls
-          pwd
-          cd backend
-          pwd
-          npm install
-
-      - name: Start the server (if applicable)
-        run: |
-          cd backend
-          npm start &
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_DATABASE: ${{ secrets.DB_DATABASE }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          nodemailer_email: ${{ secrets.nodemailer_email }}
-          nodemailer_password: ${{ secrets.nodemailer_password }}
-          PORT: ${{ secrets.PORT  }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }} 
-
-      - name: Trigger Render Deployment
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-        run: |
-          # Define the Render API endpoint and service ID
-          SERVICE_ID=srv-cstke5pu0jms73aqaj6g # Replace this with your actual Service ID
-          RENDER_API_URL="https://api.render.com/v1/services/srv-cstke5pu0jms73aqaj6g/deploys"
-          # Trigger the deployment using Render's API
-          curl -X POST \
-            -H "Accept: application/json" \
-            -H "Authorization: Bearer $RENDER_API_KEY" \
-            $RENDER_API_URL
-
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@gitHub-actions-bhatn
+        with:
+          service: fullstack-bhatn
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest
+          region: europe-west1
+          platform: managed
+          allow-unauthenticated: true
 
       - name: Wait for server to be ready
         run: sleep 10
-
-      - name: Check server health
-        run: curl https://fullstack-bhatn.onrender.com
 
       - name: Install dependencies for frontend
         run: |
