@@ -1,15 +1,12 @@
 'use client'
-import React, { useContext } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect } from 'react';
-// import { useRouter } from 'next/router';
-
+import Image from 'next/image'
 
 const Profile = () => {
-    const { user }: any = useAuth();
-    // const router = useRouter();
+  const useContext = useAuth()
+  const { user } = useContext ?? {};
   if (!user) {
-    // router.push('/');
     return null;
   }
 
@@ -20,9 +17,9 @@ const Profile = () => {
       <p>Email: {user.email}</p>
       <div>
         {user.profilepicture && (
-        <img src={`http://localhost:3000${user.profilepicture}`} alt="Profile picture" />
+          <Image src={`http://localhost:3000${user.profilepicture}`} alt="Profile picture" height={32} width={32} />
         )}
-  </div>
+      </div>
 
     </div>
   );

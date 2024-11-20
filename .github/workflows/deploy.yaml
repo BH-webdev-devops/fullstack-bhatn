@@ -1,0 +1,69 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - gitHub-actions-bhatn
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: 'latest'
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: fullstack-bhatn:latest
+          platforms: linux/amd64
+      
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@gitHub-actions-bhatn
+        with:
+          service: fullstack-bhatn
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest
+          region: europe-west1
+          platform: managed
+          allow-unauthenticated: true
+
+      - name: Wait for server to be ready
+        run: sleep 10
+
+      - name: Install dependencies for frontend
+        run: |
+          cd frontend
+          npm install --legacy-peer-deps
+          
+      - name: Run Lint
+        run: |
+          cd frontend
+          npm run lint
+ 
+      - name: Build Next.js app
+        run: |
+          cd frontend
+          npm run build --legacy-peer-deps
+
+      - name: Install specific vercel version
+        run: npm install -g vercel@39.0.5
+ 
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          cd frontend
+          npx vercel deploy --prod --token $VERCEL_TOKEN --confirm

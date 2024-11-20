@@ -1,21 +1,23 @@
 'use client'
 
-import {useState, useEffect} from 'react'
+import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import {useRouter} from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const {login} : any = useAuth()
+    const authContext = useAuth()
+    const { login } = authContext || { login: async () => ({ message: '' }) }
     const router = useRouter()
 
-    const handleSubmit = async (e : React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        try{
+        try {
             const response = await login(email, password)
             console.log("response", response)
-            if(response.message === 'Login successful'){
+            if (response.message === 'Login successful') {
                 alert('Login successful')
                 router.push('/')
             }
@@ -23,7 +25,7 @@ const Login = () => {
                 alert(response.message)
             }
         }
-        catch(err){
+        catch (err) {
             console.log(err)
         }
     }
@@ -33,10 +35,12 @@ const Login = () => {
 
             <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
                 <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                    <img
+                    <Image
                         alt="Your Company"
                         src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
                         className="mx-auto h-10 w-auto"
+                        width={32}
+                        height={32}
                     />
                     <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
                         login to your new account
@@ -68,7 +72,7 @@ const Login = () => {
                                 <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">
                                     Password
                                 </label>
-                               
+
                             </div>
                             <div className="mt-2">
                                 <input
@@ -76,7 +80,7 @@ const Login = () => {
                                     name="password"
                                     type="password"
                                     required
-                                    onChange={e => setPassword(e.target.value) }
+                                    onChange={e => setPassword(e.target.value)}
                                     autoComplete="current-password"
                                     className="block w-full text-black rounded-md border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm/6"
                                 />

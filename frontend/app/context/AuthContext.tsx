@@ -1,27 +1,27 @@
 'use client'
 
-
+import { User } from '../helpers/types'
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {useRouter} from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 
 
 interface AuthContextType {
-  user: any;
+  user: User | null;
   isAuthenticated: boolean,
-  loading: boolean, 
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  loading: boolean,
+  login: (email: string, password: string) => Promise<{ message: string }>;
+  register: (name: string, email: string, password: string) => Promise<{ message: string }>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, setUser] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [loading, setLoading] = useState(true)
-    const router = useRouter()
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   // Check if there is a token in localStorage on app load
   useEffect(() => {
@@ -32,11 +32,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const token = localStorage.getItem('token')
     console.log(token)
     if (!token) {
-        setLoading(false)
+      setLoading(false)
       return
     }
     try {
-      const res = await fetch(`http://localhost:3000/api/profile`, {
+      const res = await fetch(`https://fullstack-bhatn.onrender.com/api/profile`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -52,14 +52,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsAuthenticated(false)
       console.log(`Error fetching profile ${err}`)
     }
-    finally{
+    finally {
       setLoading(false)
     }
   }
 
   // Register function
   const register = async (name: string, email: string, password: string) => {
-    const res = await fetch('http://localhost:3000/api/register', {
+    const res = await fetch('https://fullstack-bhatn.onrender.com/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password }),
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Login function
   const login = async (email: string, password: string) => {
-    const res = await fetch('http://localhost:3000/api/login', {
+    const res = await fetch('https://fullstack-bhatn.onrender.com/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -88,22 +88,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false)
       return data
     }
-    
+
   };
 
- // Logout function
-const logout = () => {
-  localStorage.removeItem('token');  // Remove the token from local storage
-  setUser(null);                     // Clear the user data
-  setIsAuthenticated(false);         // Set authentication status to false
-  setLoading(false);
-  router.push('/login');             // Redirect to the login page
-};
+  // Logout function
+  const logout = () => {
+    localStorage.removeItem('token');  // Remove the token from local storage
+    setUser(null);                     // Clear the user data
+    setIsAuthenticated(false);         // Set authentication status to false
+    setLoading(false);
+    router.push('/login');             // Redirect to the login page
+  };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, register, logout }}> 
-    {children}
-  </AuthContext.Provider>
+    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
