@@ -35,6 +35,14 @@ jobs:
           platform: managed
           allow-unauthenticated: true
 
+      - name: Allow unauthenticated access
+        run: |
+          gcloud run services add-iam-policy-binding fullstack-bhatn \
+            --member="allUsers" \
+            --role="roles/run.invoker" \
+            --region=europe-west1 \
+            --platform=managed
+
       - name: Wait for server to be ready
         run: sleep 10
 
