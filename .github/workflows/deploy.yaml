@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches:
-      - gitHub-actions-bhatn
+      - main
   workflow_dispatch:
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
           platforms: linux/amd64
       
       - name: Deploy to Cloud Run
-        uses: google-github-actions/deploy-cloudrun@gitHub-actions-bhatn
+        uses: google-github-actions/deploy-cloudrun@main
         with:
           service: fullstack-bhatn
           image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest
