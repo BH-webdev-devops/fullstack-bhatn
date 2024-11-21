@@ -37,9 +37,9 @@ jobs:
             --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
             --build-arg DB_PORT=${{ secrets.DB_PORT }} \
             --no-cache \
-            -- push \
             -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest \
-            backend
+            backend \
+            --push
             
             
       - name: Deploy to Cloud Run
