@@ -5,6 +5,7 @@ import Sidebar from '../../../components/Sidebar';
 import { DeleteIcon, CancelIcon, CalendarIcon, EditIcon } from '@/app/helpers/icons';
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import 'dotenv/config';
 
 interface TaskType {
   id: number;
@@ -43,7 +44,7 @@ const Task: React.FC = () => {
   const fetchTasks = async () => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`https://fullstack-bhatn-413936355529.europe-west1.run.app/api/todo/${params.id}/task`, {
+      const res = await fetch(`${process.env.BACKEND_URL}/api/todo/${params.id}/task`, {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -68,7 +69,7 @@ const Task: React.FC = () => {
   const fetchTodo = async () => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`https://fullstack-bhatn-413936355529.europe-west1.run.app/api/todo/${params.id}`, {
+      const res = await fetch(`${process.env.BACKEND_URL}/api/todo/${params.id}`, {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -117,7 +118,7 @@ const Task: React.FC = () => {
     const updatedCompletedStatus = !task.completed;
     console.log(typeof task.completed, task.completed)
     try {
-      const res = await fetch(`https://fullstack-bhatn-413936355529.europe-west1.run.app/api/task/${taskId}`, {
+      const res = await fetch(`${process.env.BACKEND_URL}/api/task/${taskId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -156,7 +157,7 @@ const Task: React.FC = () => {
     if (!editedTask) return;
 
     try {
-      const res = await fetch(`https://fullstack-bhatn-413936355529.europe-west1.run.app/api/task/${taskId}`, {
+      const res = await fetch(`${process.env.BACKEND_URL}/api/task/${taskId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -188,7 +189,7 @@ const Task: React.FC = () => {
   const handleDeleteTask = async (taskId: number) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`https://fullstack-bhatn-413936355529.europe-west1.run.app/api/task/${taskId}`, {
+      const res = await fetch(`${process.env.BACKEND_URL}/api/task/${taskId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });
@@ -212,7 +213,7 @@ const Task: React.FC = () => {
 
     try {
       console.log("todo id ", params.id)
-      const res = await fetch(`https://fullstack-bhatn-413936355529.europe-west1.run.app/api/task`, {
+      const res = await fetch(`${process.env.BACKEND_URL}/api/task`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

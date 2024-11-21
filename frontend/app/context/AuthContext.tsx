@@ -3,7 +3,7 @@
 import { User } from '../helpers/types'
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'
-
+import 'dotenv/config'
 
 
 interface AuthContextType {
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return
     }
     try {
-      const res = await fetch(`https://fullstack-bhatn-413936355529.europe-west1.run.app/api/profile`, {
+      const res = await fetch(`${process.env.BACKEND_URL}/api/profile`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Register function
   const register = async (name: string, email: string, password: string) => {
-    const res = await fetch('https://fullstack-bhatn-413936355529.europe-west1.run.app/api/register', {
+    const res = await fetch('${process.env.BACKEND_URL}/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password }),
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Login function
   const login = async (email: string, password: string) => {
-    const res = await fetch('https://fullstack-bhatn-413936355529.europe-west1.run.app/api/login', {
+    const res = await fetch('${process.env.BACKEND_URL}/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),

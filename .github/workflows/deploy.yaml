@@ -33,7 +33,7 @@ jobs:
 
       - name: Remove previously built Docker image
         run: |
-          docker image rm gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest || true
+          docker image rm gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn-backend:latest || true
 
 
       - name: Build Docker image
@@ -47,7 +47,7 @@ jobs:
             --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
             --build-arg DB_PORT=${{ secrets.DB_PORT }} \
             --no-cache \
-            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest \
+            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn-backend:latest \
             backend \
             --push
             
@@ -55,8 +55,8 @@ jobs:
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v1
         with:
-          service: fullstack-bhatn
-          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest
+          service: fullstack-bhatn-backend
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn-backend:latest
           region: europe-west1
           platform: managed
           allow-unauthenticated: true
@@ -64,36 +64,25 @@ jobs:
 
       - name: Allow unauthenticated access
         run: |
-          gcloud run services add-iam-policy-binding fullstack-bhatn \
+          gcloud run services add-iam-policy-binding fullstack-bhatn-backend \
             --member="allUsers" \
             --role="roles/run.invoker" \
             --region=europe-west1 \
             --platform=managed
 
+      - name: Get backend URL
+        run: |
+          echo "BACKEND_URL=$(gcloud run services describe fullstack-bhatn-backend --region europe-west1 --format 'value(status.url)')" >> $GITHUB_ENV
+
       - name: Wait for server to be ready
         run: sleep 10
 
-      - name: Install dependencies for frontend
+      - name: Build Docker image
         run: |
-          cd frontend
-          npm install --legacy-peer-deps
-          
-      - name: Run Lint
-        run: |
-          cd frontend
-          npm run lint
- 
-      - name: Build Next.js app
-        run: |
-          cd frontend
-          npm run build --legacy-peer-deps
-
-      - name: Install specific vercel version
-        run: npm install -g vercel@39.0.5
- 
-      - name: Deploy to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          cd frontend
-          npx vercel deploy --prod --token $VERCEL_TOKEN --confirm
+          docker build \
+            --platform linux/amd64 \
+            --build-arg BACKEND_URL=${{ BACKEND_URL }} \
+            --no-cache \
+            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn-frontend:latest \
+            frontend \
+            --push
