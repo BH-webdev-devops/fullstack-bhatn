@@ -21,11 +21,8 @@ RUN npm run lint
 # Build the Next.js application
 RUN npm run build --legacy-peer-deps
 
-# Install specific Vercel version
-RUN npm install -g vercel@39.0.5
-
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE ${BACKEND_URL}
 
 # Start the Next.js application
 CMD ["npm", "run", "dev"]
