@@ -21,5 +21,7 @@ RUN npm run lint
 # Build the Next.js application
 RUN npm run build --legacy-peer-deps
 
+EXPOSE 8080
+
 # Start the Next.js application
 CMD ["npm", "run", "dev"]
