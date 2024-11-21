@@ -33,8 +33,5 @@ RUN npm run build
 # Expose the port (if needed)
 EXPOSE 3005
 
-# Use environment variable for the port
-ENV PORT 3005
-
 # Start the application
 CMD ["npm", "start"]
