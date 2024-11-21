@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from "react";
 import Sidebar from "./components/Sidebar";
 import { DeleteIcon } from '@/app/helpers/icons';
-import 'dotenv/config';
 
 interface TodoType {
   id: number,
@@ -67,12 +66,12 @@ export default function Home() {
     try {
       let res;
       if (!category && !completed && !priority) {
-        res = await fetch(`${process.env.BACKEND_URL}/api/todo`, {
+        res = await fetch(`https://fullstack-bhatn-413936355529.europe-west1.run.app/api/todo`, {
           method: 'GET',
           headers: { 'Authorization': `Bearer ${token}` }
         });
       } else {
-        let url = `${process.env.BACKEND_URL}/api/filter?`
+        let url = `https://fullstack-bhatn-413936355529.europe-west1.run.app/api/filter?`
         if (category) {
           url += `category=${category}`
         }
@@ -117,7 +116,7 @@ export default function Home() {
   const handleAddTodo = async () => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`${process.env.BACKEND_URL}/api/todo`, {
+      const res = await fetch(`https://fullstack-bhatn-413936355529.europe-west1.run.app/api/todo`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -146,7 +145,7 @@ export default function Home() {
   const handleDeleteTodo = async (todoId: number) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`${process.env.BACKEND_URL}/api/todo/${todoId}`, {
+      const res = await fetch(`https://fullstack-bhatn-413936355529.europe-west1.run.app/api/todo/${todoId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });
