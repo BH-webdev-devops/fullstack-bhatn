@@ -31,10 +31,10 @@ RUN npm rebuild bcrypt --build-from-source
 RUN npm run build
 
 # Expose the port (if needed)
-EXPOSE 8080
+EXPOSE 3005
 
 # Use environment variable for the port
-ENV PORT 8080
+ENV PORT 3005
 
 # Start the application
 CMD ["npm", "start"]

@@ -17,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const fs = require('fs');
+const port = process.env.PORT || 3007
 
 app.get('/images', (req, res) => {
     fs.readdir('public/images', (err: any, files: any) => {
@@ -46,8 +47,8 @@ const startServer = async () => {
         const client = await pool.connect();
         console.log('Database connected');
         client.release();
-        app.listen(process.env.PORT, () => {
-            console.log(`Server is running on https://fullstack-bhatn.onrender.com/`);
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}`);
         });
     } catch (error) {
         console.error('Database connection error:', error);
