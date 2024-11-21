@@ -30,7 +30,7 @@ app.get('/images', (req, res) => {
 });
 
 app.get('/', (req: Request, res: Response): any => {
-    return res.send(`Welcome to our node and postgres API`)
+    return res.send(`Welcome to our node and postgres API server`)
 })
 
 app.use('/public/images', express.static('public/images'))
