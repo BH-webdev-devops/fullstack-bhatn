@@ -60,6 +60,7 @@ jobs:
           region: europe-west1
           platform: managed
           allow-unauthenticated: true
+          timeout: 300s
 
       - name: Allow unauthenticated access
         run: |
