@@ -1,4 +1,4 @@
-name: Deploy
+name: DeployBackend
 
 on:
   push:
@@ -72,30 +72,3 @@ jobs:
 
       - name: Wait for server to be ready
         run: sleep 10
-
-      - name: Build Docker image
-        run: |
-          docker build \
-            --platform linux/amd64 \
-            --no-cache \
-            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn-frontend:latest \
-            frontend \
-            --push
-
-      - name: Deploy to Cloud Run frontend
-        uses: google-github-actions/deploy-cloudrun@v1
-        with:
-          service: fullstack-bhatn-frontend
-          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn-frontend:latest
-          region: europe-west1
-          platform: managed
-          allow-unauthenticated: true
-          timeout: 300s
-
-      - name: Allow unauthenticated access
-        run: |
-          gcloud run services add-iam-policy-binding fullstack-bhatn-frontend \
-            --member="allUsers" \
-            --role="roles/run.invoker" \
-            --region=europe-west1 \
-            --platform=managed
