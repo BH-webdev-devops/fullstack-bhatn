@@ -1,6 +1,15 @@
 # Use a Node.js base image
 FROM node:16
 
+# update env variables
+ENV DB_HOST=${DB_HOST}
+ENV DB_PORT=${DB_PORT}
+ENV DB_DATABASE=${DB_DATABASE}
+ENV DB_USER=${DB_USER}
+ENV DB_PASSWORD=${DB_PASSWORD}
+ENV DB_TYPE=${DB_TYPE}
+ENV PORT=${PORT}
+
 # Set the working directory
 WORKDIR /app
 
