@@ -1,25 +1,28 @@
-# Use the official Node.js image as the base image
-FROM node:19
-
-# Set the working directory
+FROM node:19 AS builder
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
-# Install dependencies
+# Copy package files and install dependencies
+COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps
 
-# Copy the rest of the application code
+# Copy all files and build the app
 COPY . .
+RUN npm run build
 
-# Run lint
-RUN npm run lint
+# Stage 2: Create a production image
+FROM node:19 AS runner
+WORKDIR /app
 
-# Build the Next.js application
-RUN npm run build --legacy-peer-deps
+# Install only production dependencies
+COPY package.json package-lock.json ./
+RUN npm install --legacy-peer-deps
 
+# Copy the built app from the builder stage
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Start the Next.js application
-CMD ["npm", "run", "dev"]
+# Run the Next.js app
+CMD ["npm", "start"]
