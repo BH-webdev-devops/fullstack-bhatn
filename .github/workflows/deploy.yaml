@@ -20,20 +20,22 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest backend
-          --build-arg PORT=${{ secrets.PORT }}
-          --build-arg DB_HOST=${{ secrets.DB_HOST }}
-          --build-arg DB_NAME=${{ secrets.DB_NAME }}
-          --build-arg DB_USER=${{ secrets.DB_USER }}
-          --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          --build-arg DB_PORT=${{ secrets.DB_PORT }}
+          docker build \
+            --build-arg PORT=${{ secrets.PORT }} \
+            --build-arg DB_HOST=${{ secrets.DB_HOST }} \
+            --build-arg DB_NAME=${{ secrets.DB_NAME }} \
+            --build-arg DB_USER=${{ secrets.DB_USER }} \
+            --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            --build-arg DB_PORT=${{ secrets.DB_PORT }} \
+            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest \
+            backend
 
         with:
           context: backend/.
           push: false
           tags: fullstack-bhatn:latest
           platforms: linux/amd64
-      
+            
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@main
         with:
