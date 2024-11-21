@@ -33,7 +33,7 @@ jobs:
 
       - name: Remove previously built Docker image
         run: |
-          docker image rm gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn-backend:latest || true
+          docker image rm gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest || true
 
 
       - name: Build Docker image
@@ -47,7 +47,7 @@ jobs:
             --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
             --build-arg DB_PORT=${{ secrets.DB_PORT }} \
             --no-cache \
-            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn-backend:latest \
+            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest \
             backend \
             --push
             
@@ -55,8 +55,8 @@ jobs:
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v1
         with:
-          service: fullstack-bhatn-backend
-          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn-backend:latest
+          service: fullstack-bhatn
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest
           region: europe-west1
           platform: managed
           allow-unauthenticated: true
@@ -64,15 +64,11 @@ jobs:
 
       - name: Allow unauthenticated access
         run: |
-          gcloud run services add-iam-policy-binding fullstack-bhatn-backend \
+          gcloud run services add-iam-policy-binding fullstack-bhatn \
             --member="allUsers" \
             --role="roles/run.invoker" \
             --region=europe-west1 \
             --platform=managed
-
-      - name: Get backend URL
-        run: |
-          echo "BACKEND_URL=$(gcloud run services describe fullstack-bhatn-backend --region europe-west1 --format 'value(status.url)')" >> $GITHUB_ENV
 
       - name: Wait for server to be ready
         run: sleep 10
@@ -81,8 +77,25 @@ jobs:
         run: |
           docker build \
             --platform linux/amd64 \
-            --build-arg BACKEND_URL=${{ BACKEND_URL }} \
             --no-cache \
             -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn-frontend:latest \
             frontend \
             --push
+
+      - name: Deploy to Cloud Run frontend
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: fullstack-bhatn-frontend
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn-frontend:latest
+          region: europe-west1
+          platform: managed
+          allow-unauthenticated: true
+          timeout: 300s
+
+      - name: Allow unauthenticated access
+        run: |
+          gcloud run services add-iam-policy-binding fullstack-bhatn-frontend \
+            --member="allUsers" \
+            --role="roles/run.invoker" \
+            --region=europe-west1 \
+            --platform=managed
