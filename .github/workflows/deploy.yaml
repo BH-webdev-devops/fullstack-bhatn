@@ -28,6 +28,7 @@ jobs:
             --build-arg DB_USER=${{ secrets.DB_USER }} \
             --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
             --build-arg DB_PORT=${{ secrets.DB_PORT }} \
+            --no-cache \
             -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-bhatn:latest \
             backend
             
